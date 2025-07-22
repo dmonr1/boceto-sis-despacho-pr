@@ -1,0 +1,25 @@
+<div class="contenedor-general">
+    <div class="contenedor-boton">
+      <button class="btn-importar" (click)="seleccionarArchivo()">
+        <img src="assets/icons/icon-excel.png" alt="Excel" class="icono-excel" />
+        Importar archivo Excel
+      </button>
+      <input type="file" #inputArchivo (change)="onFileChange($event)" accept=".xlsx, .xls" hidden />
+    </div>
+  
+    <div class="tabla-contenedor" *ngIf="datos.length > 0">
+      <table>
+        <thead>
+          <tr>
+            <th *ngFor="let col of columnas">{{ col }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let fila of datos">
+            <td *ngFor="let col of columnas">{{ fila[col] }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  

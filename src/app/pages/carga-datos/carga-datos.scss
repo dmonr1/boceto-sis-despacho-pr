@@ -1,0 +1,95 @@
+.contenedor-general {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #f8f8f8;
+    padding-top: 10px;
+  }
+  
+  .contenedor-boton {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .btn-importar {
+    background-color: white;
+    color: #008000;
+    font-size: 16px;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 40px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    gap: 10px;
+  }
+  
+  .btn-importar:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  }
+  
+  .icono-excel {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .tabla-contenedor {
+    margin-top: 40px;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    padding: 0 20px;
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #ffffff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  }
+  
+  thead {
+    background-color: #008080;
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+  
+  th, td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #e0e0e0;
+    text-align: left;
+    font-size: 12px;
+  }
+  
+  tr:last-child td {
+    border-bottom: none;
+  }
+  
+  tr:nth-child(even) td {
+    background-color: #f9f9f9;
+  }
+  
+  th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 12px;
+    position: sticky;
+    top: 0;
+    background-color: #008080;
+    color: #ffffff;
+  }
+  
+  td {
+    color: #333;
+  }
+  
