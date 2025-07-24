@@ -1,0 +1,122 @@
+<div class="contenedor-general">
+    <div class="lado-izquierdo">
+        <h2 class="subtitulo">Buscar Clientes:</h2>
+        <div class="busqueda">
+            <input type="text" class="input-busqueda" placeholder="Ingrese cliente" [(ngModel)]="textoBusqueda" />
+            <button class="btn-buscar" (click)="filtrarClientes()">Buscar</button>
+            <span class="contador-clientes">N° Clientes: {{ datosFiltrados.length }}</span>
+        </div>
+
+        <div class="card-clientes">
+            <table class="tabla-clientes">
+                <thead>
+                    <tr>
+                        <th>Cliente</th>
+                        <th>Dirección IPv4</th>
+                        <th>Estado de seguridad</th>
+                        <th>Versión de G DATA Security Client</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngIf="datosFiltrados.length === 0">
+                        <td colspan="4" class="sin-datos">
+                            Por favor ingresar un archivo, para visulizar clientes.
+                        </td>
+                    </tr>
+                    <tr *ngFor="let fila of datosFiltrados" (click)="seleccionarCliente(fila)"
+                        [class.selected]="clienteSeleccionado?.cliente === fila.cliente" style="cursor: pointer;">
+                        <td>{{ fila.cliente }}</td>
+                        <td>{{ fila.ipv4 }}</td>
+                        <td>{{ fila.estado }}</td>
+                        <td>{{ fila.version }}</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <div class="lado-derecho">
+
+        <div class="card-superior">
+            <div class="avatar-derecha-fondo" [class.aparecer]="animarContenido">
+                <nz-avatar [nzText]="letraAvatar" class="avatar-responsive"></nz-avatar>
+            </div>
+
+            <div class="grupo-izquierdo">
+                <div class="contenido-superior">
+                    <p>Cliente: <span>{{ clienteSeleccionado?.cliente || 'No reconocido' }}</span></p>
+                    <p>Dirección IPv4: <span>{{ clienteSeleccionado?.ipv4 || 'Por asignar' }}</span></p>
+                    <p>
+                        Estado de seguridad:
+                        <span>{{ clienteSeleccionado?.estado || 'Por determinar' }}</span>
+                        <nz-icon *ngIf="clienteSeleccionado?.estado" [nzType]="iconoEstado"
+                            [ngStyle]="{ color: colorEstado, 'font-size': '20px', 'margin-left': '6px' }">
+                        </nz-icon>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+
+
+        <div class="card-inferior">
+            <h3 class="titulo-inferior">Detalles del Cliente</h3>
+
+            <div class="grupo-dato">
+                <span class="etiqueta">Motor A:</span>
+                <span class="valor">{{ clienteSeleccionado?.motorA || '---' }}</span>
+            </div>
+
+            <div class="grupo-dato">
+                <span class="etiqueta">Motor B:</span>
+                <span class="valor">{{ clienteSeleccionado?.motorB || '---' }}</span>
+            </div>
+
+            <div class="grupo-dato">
+                <span class="etiqueta">Versión de G DATA Security Client:</span>
+                <span class="valor">{{ clienteSeleccionado?.version || '---' }}</span>
+            </div>
+
+            <div class="grupo-dato">
+                <span class="etiqueta">Componentes de seguridad:</span>
+                <span class="valor">{{ clienteSeleccionado?.componentes || '---' }}</span>
+            </div>
+
+            <div class="grupo-dato">
+                <span class="etiqueta">Es necesario reiniciar:</span>
+                <span class="valor">{{ clienteSeleccionado?.reiniciar || '---' }}</span>
+            </div>
+
+            <div class="grupo-dato">
+                <span class="etiqueta">Última sincronización:</span>
+                <span class="valor">{{ clienteSeleccionado?.ultimaSync || '---' }}</span>
+            </div>
+
+            <div class="grupo-dato">
+                <span class="etiqueta">Actualizar base de datos de virus / fecha:</span>
+                <span class="valor">{{ clienteSeleccionado?.actualizarVirus || '---' }}</span>
+            </div>
+
+            <div class="grupo-dato">
+                <span class="etiqueta">Actualizar archivos de programa / fecha:</span>
+                <span class="valor">{{ clienteSeleccionado?.actualizarProgramas || '---' }}</span>
+            </div>
+
+            <div class="grupo-dato">
+                <span class="etiqueta">Tipo:</span>
+                <span class="valor">{{ clienteSeleccionado?.tipo || '---' }}</span>
+            </div>
+
+            <div class="contenedor-boton-pdf">
+                <button class="btn-pdf" (click)="imprimirPDF()">
+                  <nz-icon nzType="file-pdf" class="icono-pdf"></nz-icon>
+                  <span>Imprimir como PDF</span>
+                </button>
+              </div>
+        </div>
+
+
+    </div>
+</div>

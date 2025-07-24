@@ -1,7 +1,9 @@
-import { Component, ViewChild, ElementRef } from '@angular/core';
+import { Component, ViewChild, ElementRef, OnInit } from '@angular/core';
 import * as XLSX from 'xlsx';
 import { CommonModule } from '@angular/common';
 import { NzIconModule } from 'ng-zorro-antd/icon';
+import Swal from 'sweetalert2';
+import { ExcelData } from '../../services/excel-data';
 
 @Component({
   selector: 'app-carga-datos',
@@ -10,13 +12,13 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
   templateUrl: './carga-datos.html',
   styleUrls: ['./carga-datos.scss']
 })
-export class CargaDatos {
+export class CargaDatos implements OnInit {
   @ViewChild('inputArchivo') inputArchivo!: ElementRef<HTMLInputElement>;
 
   datos: any[] = [];
   columnas: string[] = [];
+  nombreArchivo: string = '';
 
-  // Estados
   cargaExitosa = false;
   ocultarMensaje = false;
   mostrarDetalles = false;
@@ -25,15 +27,56 @@ export class CargaDatos {
   cargandoTabla = false;
   animarSalidaCard = false;
 
+  mostrarBotonVolver = false;
+  animarVolver = false;
+  animarSalidaVolver = false;
+
+  constructor(private excelData: ExcelData) {}
+
+  ngOnInit(): void {
+    const datos = this.excelData.getDatos();
+    const columnas = this.excelData.getColumnas();
+    const nombre = this.excelData.getNombreArchivo();
+
+    if (datos.length > 0 && columnas.length > 0) {
+      this.datos = datos;
+      this.columnas = columnas;
+      this.nombreArchivo = nombre;
+      this.mostrarDetalles = true;
+    }
+  }
+
   seleccionarArchivo() {
+    this.inputArchivo.nativeElement.value = '';
     this.inputArchivo.nativeElement.click();
   }
 
   onFileChange(event: any) {
-    const archivo = event.target.files[0];
+    const archivo: File = event.target.files[0];
     if (!archivo) return;
 
-    // Resetear estados
+    const nombre = archivo.name;
+
+    if (this.excelData.getArchivoAnterior() === nombre) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Archivo duplicado',
+        text: 'Ya has cargado este archivo. Selecciona uno diferente.',
+        confirmButtonText: 'Aceptar',
+        customClass: {
+          popup: 'swal-popup-custom',
+          title: 'swal-title-custom',
+          htmlContainer: 'swal-text-custom',
+          confirmButton: 'swal-button-custom'
+        }
+      });
+      this.inputArchivo.nativeElement.value = '';
+      return;
+    }
+
+    this.nombreArchivo = nombre;
+    this.excelData.setNombreArchivo(nombre);
+
     this.mostrarDetalles = false;
     this.mostrarTabla = false;
     this.animarSalidaCard = false;
@@ -50,6 +93,9 @@ export class CargaDatos {
 
       this.datos = datos;
       this.columnas = Object.keys(datos[0] || {});
+      this.excelData.setDatos(this.datos);
+      this.excelData.setColumnas(this.columnas);
+
       this.cargandoArchivo = false;
       this.cargaExitosa = true;
 
@@ -60,7 +106,7 @@ export class CargaDatos {
       setTimeout(() => {
         this.cargaExitosa = false;
         this.mostrarDetalles = true;
-      }, 1000);
+      }, 2000);
     };
 
     lector.readAsBinaryString(archivo);
@@ -72,11 +118,29 @@ export class CargaDatos {
     setTimeout(() => {
       this.mostrarDetalles = false;
       this.cargandoTabla = true;
-    }, 400); // Esperar la animación de salida
+    }, 700);
 
     setTimeout(() => {
       this.cargandoTabla = false;
       this.mostrarTabla = true;
-    }, 1000); // Mostrar tabla luego de carga
+      this.mostrarBotonVolver = true;
+      setTimeout(() => (this.animarVolver = true), 10);
+    }, 1000);
+  }
+
+  volverADetalles() {
+    this.animarVolver = false;
+    this.animarSalidaVolver = true;
+
+    this.mostrarTabla = false;
+    this.cargaExitosa = false;
+    this.ocultarMensaje = false;
+    this.animarSalidaCard = false;
+
+    setTimeout(() => {
+      this.mostrarBotonVolver = false;
+      this.animarSalidaVolver = false;
+      this.mostrarDetalles = true;
+    }, 400);
   }
 }

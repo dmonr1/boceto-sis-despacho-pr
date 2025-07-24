@@ -5,24 +5,40 @@ import { Injectable } from '@angular/core';
 })
 export class ExcelData {
 
-  private datos: Record<string, any>[] = [];
+  private datos: any[] = [];
   private columnas: string[] = [];
+  private nombreArchivo: string = '';
+  private archivoAnterior: string | null = null;
 
-  setDatos(datos: Record<string, any>[]): void {
+  setDatos(datos: any[]) {
     this.datos = datos;
-    this.columnas = datos.length > 0 ? Object.keys(datos[0]) : [];
-    console.log('Datos del Excel guardados en el servicio:', this.datos);
-
   }
 
-  getDatos(): Record<string, any>[] {
+  getDatos(): any[] {
     return this.datos;
+  }
+
+  setColumnas(columnas: string[]) {
+    this.columnas = columnas;
   }
 
   getColumnas(): string[] {
     return this.columnas;
   }
 
+  setNombreArchivo(nombre: string) {
+    this.nombreArchivo = nombre;
+    this.archivoAnterior = nombre;
+  }
+
+  getNombreArchivo(): string {
+    return this.nombreArchivo;
+  }
+
+  getArchivoAnterior(): string | null {
+    return this.archivoAnterior;
+  }
+  
   limpiar(): void {
     this.datos = [];
     this.columnas = [];

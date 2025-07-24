@@ -1,235 +1,322 @@
 .contenedor-general {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background-color: #f8f8f8;
-    padding-top: 10px;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #ffffff ;
+  padding-top: 10px;
+}
+
+.contenedor-boton {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.contenedor-btns {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  position: relative;
+}
+
+.btn-importar {
+  background-color: white;
+  color: #008000;
+  font-size: 14.5px;
+  padding: 9px 18px;
+  border: none;
+  border-radius: 40px;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  gap: 10px;
+  margin-left: 140px;
+}
+
+.btn-importar:hover {
+  transform: scale(1.01);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.144);
+}
+
+.icono-excel {
+  width: 24px;
+  height: 24px;
+}
+
+.boton-volver {
+  position: absolute;
+  top: 50%;
+  left: calc(100% + 10px);
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  background-color: white;
+  border-radius: 999px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 8px 16px;
+  cursor: pointer;
+  color: #2b2b2b;
+  font-size: 13px;
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
+  white-space: nowrap;
+
+  &:hover {
+    transform: translateY(-50%) scale(1.05);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.123);
   }
-  
-  .contenedor-boton {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+
+  &.animar-aparecer {
+    animation: aparecer-boton 0.4s ease-out forwards;
   }
-  
-  .btn-importar {
-    background-color: white;
-    color: #008000;
-    font-size: 15px;
-    padding: 12px 24px;
+
+  &.animar-salir {
+    animation: desaparecer-boton 0.4s ease-out forwards;
+  }
+
+  .icono-volver {
+    width: 20px;
+    height: 20px;
+    margin-right: 6px;
+    stroke: #555;
+  }
+}
+
+
+@keyframes aparecer-boton {
+  from {
+    opacity: 0;
+    transform: translate(10px, -50%);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(20px, -50%);
+    pointer-events: auto;
+  }
+}
+
+@keyframes desaparecer-boton {
+  from {
+    opacity: 1;
+    transform: translate(20px, -50%);
+  }
+
+  to {
+    opacity: 0;
+    transform: translate(10px, -50%);
+    pointer-events: none;
+  }
+}
+
+
+.tabla-contenedor {
+  margin-top: 40px;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 0 20px;
+  animation: aparecer 0.7s ease forwards;
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}
+
+thead {
+  background-color: #008080;
+  color: white;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+th,
+td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e0e0e0;
+  text-align: left;
+  font-size: 12px;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+tr:nth-child(even) td {
+  background-color: #f9f9f9;
+}
+
+th {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 12px;
+  position: sticky;
+  top: 0;
+  background-color: #008080;
+  color: #ffffff;
+}
+
+td {
+  color: #333;
+}
+
+.mensaje-exito-inline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 18px;
+  color: #008000;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+  visibility: hidden;
+}
+
+.mensaje-exito-inline.visible {
+  opacity: 1;
+  transform: translateY(0);
+  visibility: visible;
+}
+
+.mensaje-exito-inline.ocultar {
+  animation: desaparecer 0.7s ease-out forwards;
+}
+
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes desaparecer {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+.card-detalles {
+  margin-top: 40px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  padding: 28px 20px;
+  width: 280px;
+  text-align: center;
+  animation: aparecer 0.7s ease-out forwards;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+
+  &.salir {
+    animation: desaparecer 0.7s ease forwards;
+  }
+
+  h3 {
+    font-size: 17px;
+    font-weight: 600;
+    color: #333;
+    position: relative;
+    margin-bottom: 20px;
+    padding-bottom: 8px;
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background-color: #e7cdcc;
+      border-radius: 4px;
+    }
+  }
+
+  .resumen {
+    font-size: 13px;
+    color: #555;
+    margin: 2px 0;
+  }
+
+  .btn-ver-tabla {
+    margin-top: 20px;
+    background-color: #df2319;
+    color: white;
     border: none;
     border-radius: 40px;
+    padding: 8px 18px;
+    font-size: 13px;
+    cursor: pointer;
     display: flex;
     align-items: center;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    gap: 10px;
-    margin-left: 140px;
+    justify-content: center;
+    gap: 6px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
   }
-  
-  .btn-importar:hover {
+
+  .btn-ver-tabla:hover {
     transform: scale(1.05);
   }
-  
-  .icono-excel {
-    width: 24px;
-    height: 24px;
+
+}
+
+.spinner-carga-archivo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 50px;
+
+  .spinner-icon {
+    font-size: 35px;
+    color: #1890ff;
   }
-  
-  .mensaje-exito-inline {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-left: 18px;
-    color: #008000;
-    opacity: 0;
-    transform: translateY(-6px);
-    transition: opacity 0.4s ease, transform 0.4s ease;
-    visibility: hidden;
-  
-    &.visible {
-      opacity: 1;
-      transform: translateY(0);
-      visibility: visible;
-    }
-  
-    &.ocultar {
-      animation: desaparecer 0.4s ease-out forwards;
-    }
+}
+
+.spinner-carga-tabla {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 40px;
+
+  .spinner-icon {
+    font-size: 32px;
+    color: #1890ff;
   }
-  
-  .card-detalles {
-    margin-top: 40px;
-    background: #fff;
-    border-radius: 16px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
-    padding: 28px 20px;
-    width: 280px;
-    text-align: center;
-    animation: aparecer 0.4s ease-out forwards;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-  
-    &.salir {
-      animation: desaparecer 0.4s ease forwards;
-    }
-  
-    h3 {
-      font-size: 17px;
-      font-weight: 600;
-      color: #333;
-      margin-bottom: 20px;
-      padding-bottom: 8px;
-      position: relative;
-  
-      &::after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        height: 2px;
-        background-color: #e7cdcc;
-        border-radius: 4px;
-      }
-    }
-  
-    .resumen {
-      font-size: 13px;
-      color: #555;
-      margin: 2px 0;
-    }
-  
-    .btn-ver-tabla {
-      margin-top: 20px;
-      background-color: #df2319;
-      color: white;
-      border: none;
-      border-radius: 40px;
-      padding: 8px 18px;
-      font-size: 13px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-      transition: transform 0.2s ease;
-  
-      &:hover {
-        transform: scale(1.05);
-      }
-    }
+
+  .spinner-text {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #1890ff;
   }
-  
-  .spinner-carga-archivo {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 50px;
-  
-    .spinner-icon {
-      font-size: 35px;
-      color: #1890ff;
-    }
-  }
-  
-  .spinner-carga-tabla {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    margin-top: 40px;
-  
-    .spinner-icon {
-      font-size: 32px;
-      color: #1890ff;
-    }
-  
-    .spinner-text {
-      margin-top: 10px;
-      font-size: 14px;
-      color: #1890ff;
-    }
-  }
-  
-  .tabla-contenedor {
-    margin-top: 40px;
-    width: 100%;
-    max-width: 100%;
-    overflow-x: auto;
-    padding: 0 20px;
-    animation: aparecer 0.4s ease forwards;
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: #ffffff;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
-  }
-  
-  thead {
-    background-color: #008080;
-    color: white;
-    position: sticky;
-    top: 0;
-    z-index: 2;
-  }
-  
-  th,
-  td {
-    padding: 12px 16px;
-    border-bottom: 1px solid #e0e0e0;
-    text-align: left;
-    font-size: 12px;
-  }
-  
-  tr:last-child td {
-    border-bottom: none;
-  }
-  
-  tr:nth-child(even) td {
-    background-color: #f9f9f9;
-  }
-  
-  th {
-    font-weight: 600;
-    text-transform: uppercase;
-    font-size: 12px;
-  }
-  
-  td {
-    color: #333;
-  }
-  
-  @keyframes aparecer {
-    from {
-      opacity: 0;
-      transform: translateY(-6px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  
-  @keyframes desaparecer {
-    from {
-      opacity: 1;
-      transform: translateY(0);
-    }
-    to {
-      opacity: 0;
-      transform: translateY(-6px);
-    }
-  }
-  
+}
