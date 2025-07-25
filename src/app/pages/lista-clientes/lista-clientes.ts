@@ -2,9 +2,10 @@ import { Component } from '@angular/core';
 import { ExcelData } from '../../services/excel-data';
 import { CommonModule } from '@angular/common';
 import { NzAvatarModule } from 'ng-zorro-antd/avatar';
-import { FormsModule } from '@angular/forms'; 
+import { FormsModule } from '@angular/forms';
 import { NzIconModule } from 'ng-zorro-antd/icon';
-
+import html2pdf from 'html2pdf.js';
+  
 @Component({
   selector: 'app-lista-clientes',
   imports: [CommonModule, NzAvatarModule, FormsModule, NzIconModule],
@@ -12,7 +13,6 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
   templateUrl: './lista-clientes.html',
   styleUrl: './lista-clientes.scss'
 })
-
 export class ListaClientes {
   datosOriginales: any[] = [];
   datosFiltrados: any[] = [];
@@ -34,24 +34,25 @@ export class ListaClientes {
     tipo: string;
   } | null = null;
 
-  constructor(private excelData: ExcelData) {}
+  constructor(private excelData: ExcelData) { }
 
   ngOnInit(): void {
     const datos = this.excelData.getDatos();
-    console.log(datos)
+    console.log(datos);
+
     this.datosOriginales = datos.map(fila => ({
-      cliente: fila['Cliente'] ?? '',
-      ipv4: fila['DirecciÃ³n IPv4'] ?? '',
-      estado: fila['Estado de seguridad'] ?? '',
-      motorA: fila['Motor A'] ?? '',
-      motorB: fila['Motor B'] ?? '',
-      version: fila['VersiÃ³n de G DATA Security Client'] ?? '',
-      componentes: fila['Componentes de seguridad'] ?? '',
-      reiniciar: fila['Es necesario reiniciar'] ?? '',
-      ultimaSync: fila['Ãšltima sincronizaciÃ³n'] ?? '',
-      actualizarVirus: fila['Actualizar base de datos de virus / fecha'] ?? '',
-      actualizarProgramas: fila['Actualizar archivos de programa / fecha'] ?? '',
-      tipo: fila['Tipo'] ?? ''
+      cliente: fila['Cliente'],
+      ipv4: fila['Dirección IPv4'],
+      estado: fila['Estado de seguridad'],
+      motorA: fila['Motor A'],
+      motorB: fila['Motor B'],
+      version: fila['Versión de G DATA Security Client'],
+      componentes: fila['Componentes de seguridad'],
+      reiniciar: fila['Es necesario reiniciar'],
+      ultimaSync: fila['Última sincronización'],
+      actualizarVirus: fila['Actualizar base de datos de virus / fecha'],
+      actualizarProgramas: fila['Actualizar archivos de programa / fecha'],
+      tipo: fila['Tipo']
     }));
 
     this.datosFiltrados = [...this.datosOriginales];
@@ -63,7 +64,6 @@ export class ListaClientes {
 
   seleccionarCliente(fila: any): void {
     this.clienteSeleccionado = { ...fila };
-
     this.animarContenido = false;
     setTimeout(() => (this.animarContenido = true), 10);
   }
@@ -86,24 +86,26 @@ export class ListaClientes {
 
   get iconoEstado(): string {
     const estado = this.clienteSeleccionado?.estado?.toLowerCase() || '';
-    if (estado.includes('Sin conexiÃ³n con el servidor')) return 'disconnect';
+    if (estado.includes('sin conexión con el servidor')) return 'disconnect';
     if (estado.includes('protegido')) return 'check-circle';
-    if (estado.includes('riesgo') || estado.includes('no autorizado')) return 'warning';
-    if (estado.includes('error') || estado.includes('sin conexión')) return 'close-circle';
+    if (estado.includes('riesgo')) return 'stop';
+    if (estado.includes('no autorizado')) return 'warning';
+    if (estado.includes('error') || estado.includes('sin conexión')) return 'wifi';
     return 'info-circle';
   }
-  
+
   get colorEstado(): string {
     const estado = this.clienteSeleccionado?.estado?.toLowerCase() || '';
-    if (estado.includes('Sin conexiÃ³n con el servidor')) return '#ff4d4f';
-    if (estado.includes('protegido')) return '#52c41a'; // verde
-    if (estado.includes('riesgo') || estado.includes('no autorizado')) return '#faad14'; // amarillo
-    if (estado.includes('error') || estado.includes('sin conexión')) return '#ff4d4f'; // rojo
-    return '#d9d9d9'; // gris neutro
+    if (estado.includes('sin conexión con el servidor')) return '#ff4d4f';
+    if (estado.includes('protegido')) return '#52c41a';
+    if (estado.includes('riesgo')) return '#ff4d4f';
+    if (estado.includes('no autorizado')) return '#ffde4dff';
+
+    if (estado.includes('error') || estado.includes('sin conexión')) return '#ff4d4f';
+    return '#d9d9d9';
   }
 
   imprimirPDF(): void {
-    console.log('Implementar lógica de impresión o generación de PDF');
-    // Puedes integrar jsPDF, html2pdf o window.print()
+    window.print();
   }
 }

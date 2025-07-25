@@ -37,7 +37,7 @@
 
     </div>
 
-    <div class="lado-derecho">
+    <div class="lado-derecho" id="zona-imprimir">
 
         <div class="card-superior">
             <div class="avatar-derecha-fondo" [class.aparecer]="animarContenido">
@@ -58,8 +58,6 @@
                 </div>
             </div>
         </div>
-
-
 
         <div class="card-inferior">
             <h3 class="titulo-inferior">Detalles del Cliente</h3>
@@ -111,12 +109,11 @@
 
             <div class="contenedor-boton-pdf">
                 <button class="btn-pdf" (click)="imprimirPDF()">
-                  <nz-icon nzType="file-pdf" class="icono-pdf"></nz-icon>
-                  <span>Imprimir como PDF</span>
+                    <nz-icon nzType="file-pdf" class="icono-pdf"></nz-icon>
+                    <span>Imprimir como PDF</span>
                 </button>
-              </div>
+            </div>
         </div>
-
 
     </div>
 </div>
