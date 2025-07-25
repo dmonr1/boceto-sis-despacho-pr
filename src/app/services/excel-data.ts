@@ -4,7 +4,6 @@ import { Injectable } from '@angular/core';
   providedIn: 'root'
 })
 export class ExcelData {
-
   private datosResumen: any[] = [];
   private columnasResumen: string[] = [];
   private nombreResumen: string = '';
@@ -17,9 +16,6 @@ export class ExcelData {
   private columnasSoftware: string[] = [];
   private nombreSoftware: string = '';
 
-  private archivoAnterior: string | null = null;
-
-  // Funciones de limpieza de texto
   private repararTexto(valor: any): string {
     if (!valor) return '';
     return valor.toString()
@@ -38,6 +34,16 @@ export class ExcelData {
       .replace(/Ã/g, '');
   }
 
+  private tipoArchivoActivo: 'resumen' | 'hardware' | 'software' | null = null;
+
+setArchivoActivo(tipo: 'resumen' | 'hardware' | 'software'): void {
+  this.tipoArchivoActivo = tipo;
+}
+
+getArchivoActivo(): 'resumen' | 'hardware' | 'software' | null {
+  return this.tipoArchivoActivo;
+}
+
   private repararObjeto(obj: any): any {
     const reparado: any = {};
     for (const clave in obj) {
@@ -45,11 +51,10 @@ export class ExcelData {
     }
     return reparado;
   }
-
   setDatosPorTipo(tipo: 'resumen' | 'hardware' | 'software', datos: any[], columnas: string[], nombre: string): void {
     const datosReparados = datos.map(d => this.repararObjeto(d));
     const columnasReparadas = columnas.map(c => this.repararTexto(c));
-
+  
     if (tipo === 'resumen') {
       this.datosResumen = datosReparados;
       this.columnasResumen = columnasReparadas;
@@ -63,9 +68,10 @@ export class ExcelData {
       this.columnasSoftware = columnasReparadas;
       this.nombreSoftware = nombre;
     }
-
-    this.archivoAnterior = nombre;
+  
+    this.setArchivoActivo(tipo);
   }
+  
 
   getDatosPorTipo(tipo: 'resumen' | 'hardware' | 'software'): any[] {
     return tipo === 'resumen' ? this.datosResumen
@@ -85,16 +91,40 @@ export class ExcelData {
          : this.nombreSoftware;
   }
 
-  getArchivoAnterior(): string | null {
-    return this.archivoAnterior;
+  isCargado(tipo: 'resumen' | 'hardware' | 'software'): boolean {
+    const datos = this.getDatosPorTipo(tipo);
+    return Array.isArray(datos) && datos.length > 0;
+  }
+
+  eliminarPorTipo(tipo: 'resumen' | 'hardware' | 'software'): void {
+    if (tipo === 'resumen') {
+      this.datosResumen = [];
+      this.columnasResumen = [];
+      this.nombreResumen = '';
+    } else if (tipo === 'hardware') {
+      this.datosHardware = [];
+      this.columnasHardware = [];
+      this.nombreHardware = '';
+    } else if (tipo === 'software') {
+      this.datosSoftware = [];
+      this.columnasSoftware = [];
+      this.nombreSoftware = '';
+    }
   }
 
   limpiar(): void {
     this.datosResumen = [];
     this.columnasResumen = [];
+    this.nombreResumen = '';
+
     this.datosHardware = [];
     this.columnasHardware = [];
+    this.nombreHardware = '';
+
     this.datosSoftware = [];
     this.columnasSoftware = [];
+    this.nombreSoftware = '';
   }
+
+  
 }

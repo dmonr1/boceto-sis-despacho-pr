@@ -6,19 +6,16 @@
         <img src="assets/icons/icon-excel.png" alt="Excel" class="icono-excel" />
         Importar archivo Excel
       </button>
-    
-      <div *ngIf="mostrarBotonVolver"
-           class="boton-volver"
-           [class.animar-aparecer]="animarVolver"
-           [class.animar-salir]="animarSalidaVolver"
-           (click)="volverADetalles()">
-        <svg xmlns="http://www.w3.org/2000/svg" class="icono-volver" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+
+      <div *ngIf="mostrarBotonVolver" class="boton-volver" [class.animar-aparecer]="animarVolver"
+        [class.animar-salir]="animarSalidaVolver" (click)="volverADetalles()">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icono-volver" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+          stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
         </svg>
         <span class="texto-volver">Volver a detalles</span>
       </div>
     </div>
-
 
     <div class="mensaje-exito-inline" [class.visible]="cargaExitosa" [class.ocultar]="ocultarMensaje">
       <span nz-icon nzType="check-circle" nzTheme="outline" class="icono-exito"></span>
@@ -37,11 +34,39 @@
     <span class="spinner-text">Cargando...</span>
   </div>
 
+  <div class="panel-tipos" *ngIf="mostrarPanelTipos" [ngClass]="{ salir: animarSalidaPanelTipos }">
+    <h4>Archivos cargados</h4>
+    <div class="tipo-opcion" *ngFor="let tipo of tiposArchivos" [class.activo]="excelData.isCargado(tipo)">
+      <div class="circulo-estado"></div>
+      <span class="nombre-tipo">{{ nombresTipos[tipo] }}</span>
+
+      <!-- Ícono de eliminar personalizado -->
+      <span *ngIf="excelData.isCargado(tipo)" nz-icon nzType="delete" nzTheme="outline" class="icono-eliminar"
+        (click)="mostrarAlertaEliminar(tipo)">
+      </span>
+    </div>
+  </div>
+
+
+  <div class="alerta-overlay" *ngIf="mostrarAlerta">
+    <div class="alerta-container">
+      <h3 class="alerta-titulo">{{ alertaTitulo }}</h3>
+      <p class="alerta-mensaje">{{ alertaMensaje }}</p>
+      <div class="alerta-botones">
+        <button class="btn-cancelar" (click)="cancelarAlerta()">Cancelar</button>
+        <button class="btn-confirmar" (click)="confirmarAlerta()">Aceptar</button>
+      </div>
+    </div>
+  </div>
+
+
+
+
   <div class="card-detalles" *ngIf="mostrarDetalles" [class.salir]="animarSalidaCard">
     <h3>Detalles del archivo</h3>
     <p class="resumen"><strong>Archivo:</strong> {{ nombreArchivo }}</p>
-    <p class="resumen">Número de filas: {{ datos.length }}</p>
-    <p class="resumen">Número de columnas: {{ columnas.length }}</p>
+    <p class="resumen"><strong>Número de filas:</strong> {{ datos.length }}</p>
+    <p class="resumen"><strong>Número de columnas:</strong> {{ columnas.length }}</p>
     <button class="btn-ver-tabla" (click)="verTabla()">
       <span nz-icon nzType="eye" nzTheme="outline"></span>
       Ver tabla

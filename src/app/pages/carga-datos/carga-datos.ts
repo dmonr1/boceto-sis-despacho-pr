@@ -32,25 +32,33 @@ export class CargaDatos implements OnInit {
   animarVolver = false;
   animarSalidaVolver = false;
 
-  constructor(private excelData: ExcelData) {}
+  mostrarPanelTipos = true;
+
+  tiposArchivos: ('resumen' | 'hardware' | 'software')[] = ['resumen', 'hardware', 'software'];
+
+  nombresTipos: Record<'resumen' | 'hardware' | 'software', string> = {
+    resumen: 'Resumen',
+    hardware: 'Hardware',
+    software: 'Software'
+  };
+
+  constructor(public excelData: ExcelData) {}
 
   ngOnInit(): void {
-    const nombre = this.excelData.getArchivoAnterior();
-    if (!nombre) return;
-
-    const tipo = this.detectarTipo(nombre);
+    const tipo = this.excelData.getArchivoActivo();
     if (!tipo) return;
-
+  
     this.tipoArchivo = tipo;
     this.datos = this.excelData.getDatosPorTipo(tipo);
     this.columnas = this.excelData.getColumnasPorTipo(tipo);
     this.nombreArchivo = this.excelData.getNombrePorTipo(tipo);
-
+  
     if (this.datos.length > 0 && this.columnas.length > 0) {
       this.mostrarDetalles = true;
+      this.mostrarPanelTipos = true;
     }
   }
-
+  
   seleccionarArchivo() {
     this.inputArchivo.nativeElement.value = '';
     this.inputArchivo.nativeElement.click();
@@ -61,25 +69,8 @@ export class CargaDatos implements OnInit {
     if (!archivo) return;
 
     const nombre = archivo.name;
-
-    if (this.excelData.getArchivoAnterior() === nombre) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Archivo duplicado',
-        text: 'Ya has cargado este archivo. Selecciona uno diferente.',
-        confirmButtonText: 'Aceptar',
-        customClass: {
-          popup: 'swal-popup-custom',
-          title: 'swal-title-custom',
-          htmlContainer: 'swal-text-custom',
-          confirmButton: 'swal-button-custom'
-        }
-      });
-      this.inputArchivo.nativeElement.value = '';
-      return;
-    }
-
     const tipo = this.detectarTipo(nombre);
+
     if (!tipo) {
       Swal.fire({
         icon: 'error',
@@ -90,9 +81,20 @@ export class CargaDatos implements OnInit {
       return;
     }
 
+    const nombrePrevio = this.excelData.getNombrePorTipo(tipo);
+    if (nombrePrevio === nombre) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Archivo duplicado',
+        text: 'Ya has cargado este archivo. Selecciona uno diferente.',
+        confirmButtonText: 'Aceptar'
+      });
+      this.inputArchivo.nativeElement.value = '';
+      return;
+    }
+
     this.nombreArchivo = nombre;
     this.tipoArchivo = tipo;
-
     this.mostrarDetalles = false;
     this.mostrarTabla = false;
     this.animarSalidaCard = false;
@@ -110,16 +112,12 @@ export class CargaDatos implements OnInit {
 
       this.datos = datos;
       this.columnas = columnas;
-
       this.excelData.setDatosPorTipo(tipo, datos, columnas, nombre);
 
       this.cargandoArchivo = false;
       this.cargaExitosa = true;
 
-      setTimeout(() => {
-        this.ocultarMensaje = true;
-      }, 1000);
-
+      setTimeout(() => (this.ocultarMensaje = true), 1000);
       setTimeout(() => {
         this.cargaExitosa = false;
         this.mostrarDetalles = true;
@@ -131,12 +129,14 @@ export class CargaDatos implements OnInit {
 
   verTabla() {
     this.animarSalidaCard = true;
-
+    this.animarSalidaPanelTipos = true;
+  
     setTimeout(() => {
+      this.mostrarPanelTipos = false;
       this.mostrarDetalles = false;
       this.cargandoTabla = true;
     }, 700);
-
+  
     setTimeout(() => {
       this.cargandoTabla = false;
       this.mostrarTabla = true;
@@ -144,23 +144,26 @@ export class CargaDatos implements OnInit {
       setTimeout(() => (this.animarVolver = true), 10);
     }, 1000);
   }
+  
 
   volverADetalles() {
     this.animarVolver = false;
     this.animarSalidaVolver = true;
-
+  
     this.mostrarTabla = false;
     this.cargaExitosa = false;
     this.ocultarMensaje = false;
     this.animarSalidaCard = false;
-
+  
     setTimeout(() => {
       this.mostrarBotonVolver = false;
       this.animarSalidaVolver = false;
       this.mostrarDetalles = true;
+      this.mostrarPanelTipos = true;
+      this.animarSalidaPanelTipos = false;
     }, 400);
   }
-
+  
   private detectarTipo(nombre: string): 'resumen' | 'hardware' | 'software' | null {
     const lower = nombre.toLowerCase();
     if (lower.includes('resumen')) return 'resumen';
@@ -168,4 +171,45 @@ export class CargaDatos implements OnInit {
     if (lower.includes('software')) return 'software';
     return null;
   }
+
+  eliminarArchivo(tipo: 'resumen' | 'hardware' | 'software'): void {
+    this.excelData.eliminarPorTipo(tipo);
+
+    if (this.tipoArchivo === tipo) {
+      this.tipoArchivo = null;
+      this.datos = [];
+      this.columnas = [];
+      this.nombreArchivo = '';
+      this.mostrarDetalles = false;
+      this.mostrarTabla = false;
+      this.mostrarBotonVolver = false;
+    }
+  }
+
+  mostrarAlerta = false;
+  alertaTitulo = '';
+  alertaMensaje = '';
+  tipoPendienteEliminar: 'resumen' | 'hardware' | 'software' | null = null;
+
+  mostrarAlertaEliminar(tipo: 'resumen' | 'hardware' | 'software') {
+    this.alertaTitulo = '¿Estás seguro?';
+    this.alertaMensaje = `¿Deseas eliminar el archivo cargado de tipo "${this.nombresTipos[tipo]}"?`;
+    this.tipoPendienteEliminar = tipo;
+    this.mostrarAlerta = true;
+  }
+
+  cancelarAlerta() {
+    this.mostrarAlerta = false;
+    this.tipoPendienteEliminar = null;
+  }
+
+  confirmarAlerta() {
+    if (this.tipoPendienteEliminar) {
+      this.eliminarArchivo(this.tipoPendienteEliminar);
+    }
+    this.mostrarAlerta = false;
+  }
+
+animarSalidaPanelTipos = false;
+
 }
