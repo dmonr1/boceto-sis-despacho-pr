@@ -18,6 +18,7 @@ export class CargaDatos implements OnInit {
   datos: any[] = [];
   columnas: string[] = [];
   nombreArchivo: string = '';
+  tipoArchivo: 'resumen' | 'hardware' | 'software' | null = null;
 
   cargaExitosa = false;
   ocultarMensaje = false;
@@ -34,14 +35,18 @@ export class CargaDatos implements OnInit {
   constructor(private excelData: ExcelData) {}
 
   ngOnInit(): void {
-    const datos = this.excelData.getDatos();
-    const columnas = this.excelData.getColumnas();
-    const nombre = this.excelData.getNombreArchivo();
+    const nombre = this.excelData.getArchivoAnterior();
+    if (!nombre) return;
 
-    if (datos.length > 0 && columnas.length > 0) {
-      this.datos = datos;
-      this.columnas = columnas;
-      this.nombreArchivo = nombre;
+    const tipo = this.detectarTipo(nombre);
+    if (!tipo) return;
+
+    this.tipoArchivo = tipo;
+    this.datos = this.excelData.getDatosPorTipo(tipo);
+    this.columnas = this.excelData.getColumnasPorTipo(tipo);
+    this.nombreArchivo = this.excelData.getNombrePorTipo(tipo);
+
+    if (this.datos.length > 0 && this.columnas.length > 0) {
       this.mostrarDetalles = true;
     }
   }
@@ -74,8 +79,19 @@ export class CargaDatos implements OnInit {
       return;
     }
 
+    const tipo = this.detectarTipo(nombre);
+    if (!tipo) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Archivo inválido',
+        text: 'El nombre del archivo debe incluir "Resumen", "Hardware" o "Software".',
+        confirmButtonText: 'Aceptar'
+      });
+      return;
+    }
+
     this.nombreArchivo = nombre;
-    this.excelData.setNombreArchivo(nombre);
+    this.tipoArchivo = tipo;
 
     this.mostrarDetalles = false;
     this.mostrarTabla = false;
@@ -90,11 +106,12 @@ export class CargaDatos implements OnInit {
       const libro = XLSX.read(datosBinarios, { type: 'binary' });
       const hoja = libro.Sheets[libro.SheetNames[0]];
       const datos = XLSX.utils.sheet_to_json(hoja, { defval: '' });
+      const columnas = Object.keys(datos[0] || {});
 
       this.datos = datos;
-      this.columnas = Object.keys(datos[0] || {});
-      this.excelData.setDatos(this.datos);
-      this.excelData.setColumnas(this.columnas);
+      this.columnas = columnas;
+
+      this.excelData.setDatosPorTipo(tipo, datos, columnas, nombre);
 
       this.cargandoArchivo = false;
       this.cargaExitosa = true;
@@ -142,5 +159,13 @@ export class CargaDatos implements OnInit {
       this.animarSalidaVolver = false;
       this.mostrarDetalles = true;
     }, 400);
+  }
+
+  private detectarTipo(nombre: string): 'resumen' | 'hardware' | 'software' | null {
+    const lower = nombre.toLowerCase();
+    if (lower.includes('resumen')) return 'resumen';
+    if (lower.includes('hardware')) return 'hardware';
+    if (lower.includes('software')) return 'software';
+    return null;
   }
 }

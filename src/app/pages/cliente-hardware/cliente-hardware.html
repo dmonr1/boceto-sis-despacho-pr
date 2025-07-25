@@ -1,1 +1,36 @@
-<p>cliente-hardware works!</p>
+
+<div class="contenedor-hardware">
+    <div class="contenedor-superior">
+      <div class="card card-1">Card 1</div>
+      <div class="card card-2">Card 2</div>
+      <div class="card card-3">Card 3</div>
+    </div>
+  
+    <div class="contenedor-inferior">
+      <div class="card-2 card-4">
+        <table class="tabla-hardware">
+            <thead>
+              <tr>
+                <th>Cliente</th>
+                <th>CPU</th>
+                <th>Fabricante</th>
+                <th>Nombre del sistema</th>
+                <th>Fabricante del BIOS</th>
+                <th>Versión del BIOS</th>
+              </tr>
+            </thead>    
+            <tbody>
+              <tr *ngFor="let fila of datosHardware">
+                <td>{{ fila['Cliente'] }}</td>
+                <td>{{ fila['CPU'] }}</td>
+                <td>{{ fila['Fabricante del sistema'] }}</td>
+                <td>{{ fila['Nombre del sistema'] }}</td>
+                <td>{{ fila['Fabricante del BIOS'] }}</td>
+                <td>{{ fila['Versión del BIOS'] }}</td>
+              </tr>
+            </tbody>
+          </table>      </div>
+      <div class="card card-5">Card lateral</div>
+    </div>
+  </div>
+  

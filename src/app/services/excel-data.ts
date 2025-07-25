@@ -5,11 +5,21 @@ import { Injectable } from '@angular/core';
 })
 export class ExcelData {
 
-  private datos: any[] = [];
-  private columnas: string[] = [];
-  private nombreArchivo: string = '';
+  private datosResumen: any[] = [];
+  private columnasResumen: string[] = [];
+  private nombreResumen: string = '';
+
+  private datosHardware: any[] = [];
+  private columnasHardware: string[] = [];
+  private nombreHardware: string = '';
+
+  private datosSoftware: any[] = [];
+  private columnasSoftware: string[] = [];
+  private nombreSoftware: string = '';
+
   private archivoAnterior: string | null = null;
 
+  // Funciones de limpieza de texto
   private repararTexto(valor: any): string {
     if (!valor) return '';
     return valor.toString()
@@ -36,29 +46,43 @@ export class ExcelData {
     return reparado;
   }
 
-  setDatos(datos: any[]) {
-    this.datos = datos.map(d => this.repararObjeto(d));
-  }
+  setDatosPorTipo(tipo: 'resumen' | 'hardware' | 'software', datos: any[], columnas: string[], nombre: string): void {
+    const datosReparados = datos.map(d => this.repararObjeto(d));
+    const columnasReparadas = columnas.map(c => this.repararTexto(c));
 
-  getDatos(): any[] {
-    return this.datos;
-  }
+    if (tipo === 'resumen') {
+      this.datosResumen = datosReparados;
+      this.columnasResumen = columnasReparadas;
+      this.nombreResumen = nombre;
+    } else if (tipo === 'hardware') {
+      this.datosHardware = datosReparados;
+      this.columnasHardware = columnasReparadas;
+      this.nombreHardware = nombre;
+    } else if (tipo === 'software') {
+      this.datosSoftware = datosReparados;
+      this.columnasSoftware = columnasReparadas;
+      this.nombreSoftware = nombre;
+    }
 
-  setColumnas(columnas: string[]) {
-    this.columnas = columnas.map(c => this.repararTexto(c));
-  }
-
-  getColumnas(): string[] {
-    return this.columnas;
-  }
-
-  setNombreArchivo(nombre: string) {
-    this.nombreArchivo = nombre;
     this.archivoAnterior = nombre;
   }
 
-  getNombreArchivo(): string {
-    return this.nombreArchivo;
+  getDatosPorTipo(tipo: 'resumen' | 'hardware' | 'software'): any[] {
+    return tipo === 'resumen' ? this.datosResumen
+         : tipo === 'hardware' ? this.datosHardware
+         : this.datosSoftware;
+  }
+
+  getColumnasPorTipo(tipo: 'resumen' | 'hardware' | 'software'): string[] {
+    return tipo === 'resumen' ? this.columnasResumen
+         : tipo === 'hardware' ? this.columnasHardware
+         : this.columnasSoftware;
+  }
+
+  getNombrePorTipo(tipo: 'resumen' | 'hardware' | 'software'): string {
+    return tipo === 'resumen' ? this.nombreResumen
+         : tipo === 'hardware' ? this.nombreHardware
+         : this.nombreSoftware;
   }
 
   getArchivoAnterior(): string | null {
@@ -66,7 +90,11 @@ export class ExcelData {
   }
 
   limpiar(): void {
-    this.datos = [];
-    this.columnas = [];
+    this.datosResumen = [];
+    this.columnasResumen = [];
+    this.datosHardware = [];
+    this.columnasHardware = [];
+    this.datosSoftware = [];
+    this.columnasSoftware = [];
   }
 }

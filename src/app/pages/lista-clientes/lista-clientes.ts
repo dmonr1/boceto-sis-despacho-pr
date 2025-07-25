@@ -5,7 +5,7 @@ import { NzAvatarModule } from 'ng-zorro-antd/avatar';
 import { FormsModule } from '@angular/forms';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import html2pdf from 'html2pdf.js';
-  
+
 @Component({
   selector: 'app-lista-clientes',
   imports: [CommonModule, NzAvatarModule, FormsModule, NzIconModule],
@@ -34,13 +34,13 @@ export class ListaClientes {
     tipo: string;
   } | null = null;
 
-  constructor(private excelData: ExcelData) { }
+  constructor(private excelData: ExcelData) {}
 
   ngOnInit(): void {
-    const datos = this.excelData.getDatos();
-    console.log(datos);
+    const resumen = this.excelData.getDatosPorTipo('resumen');
+    console.log('Datos resumen:', resumen);
 
-    this.datosOriginales = datos.map(fila => ({
+    this.datosOriginales = resumen.map(fila => ({
       cliente: fila['Cliente'],
       ipv4: fila['Dirección IPv4'],
       estado: fila['Estado de seguridad'],
@@ -100,7 +100,6 @@ export class ListaClientes {
     if (estado.includes('protegido')) return '#52c41a';
     if (estado.includes('riesgo')) return '#ff4d4f';
     if (estado.includes('no autorizado')) return '#ffde4dff';
-
     if (estado.includes('error') || estado.includes('sin conexión')) return '#ff4d4f';
     return '#d9d9d9';
   }
