@@ -1,46 +1,57 @@
 <div class="contenedor-hardware">
   <div class="contenedor-superior">
-    <div class="card card-1 card-superior">
-      <div class="avatar-derecha-fondo" [class.aparecer]="animarContenidoHardware">
-        <nz-avatar [nzText]="letraAvatarHardware" class="avatar-responsive"></nz-avatar>
-      </div>
 
-      <div class="grupo-izquierdo">
-        <div class="contenido-superior">
-          <p>Cliente: <span>{{ clienteSeleccionadoHardware?.cliente || 'No reconocido' }}</span></p>
-          <p>CPU: <span>{{ clienteSeleccionadoHardware?.cpu || 'Por asignar' }}</span></p>
-          <p>
-            Fabricante:
-            <span>{{ clienteSeleccionadoHardware?.fabricante || 'Desconocido' }}</span>
-          </p>
+    <!-- Card 1: Cliente -->
+    <div class="card card-1 card-superior">
+      <h4 class="titulo-card">Datos del Cliente</h4>
+      <div class="contenido-card">
+        <div class="avatar-derecha-fondo" [class.aparecer]="animarContenidoHardware">
+          <nz-avatar [nzText]="letraAvatarHardware" class="avatar-responsive"></nz-avatar>
+        </div>
+        <div class="grupo-izquierdo">
+          <div class="contenido-superior">
+            <p>Cliente: <span>{{ clienteSeleccionadoHardware?.cliente || 'No reconocido' }}</span></p>
+            <p>CPU: <span>{{ clienteSeleccionadoHardware?.cpu || 'Por asignar' }}</span></p>
+            <p>Fabricante: <span>{{ clienteSeleccionadoHardware?.fabricante || 'Desconocido' }}</span></p>
+          </div>
         </div>
       </div>
     </div>
+
+    <!-- Card 2: Fabricante -->
     <div class="card card-2 card-fabricante" [class.aparecer]="animarContenidoHardware">
-      <div class="logo-fabricante">
-        <img [src]="obtenerLogoFabricante(clienteSeleccionadoHardware?.fabricante)" alt="Logo fabricante" />
-      </div>
-      <div class="detalles-fabricante">
-        <p><strong>Fabricante del sistema:</strong> {{ clienteSeleccionadoHardware?.fabricante || '---' }}</p>
-        <p><strong>Nombre del sistema:</strong> {{ clienteSeleccionadoHardware?.nombreSistema || '---' }}</p>
-        <p><strong>Versión del sistema:</strong> {{ clienteSeleccionadoHardware?.versionSistema || '---' }}</p>
-        <p><strong>Familia del sistema:</strong> {{ clienteSeleccionadoHardware?.familiaSistema || '---' }}</p>
+      <h4 class="titulo-card">Información del Sistema</h4>
+      <div class="contenido-card">
+        <div class="logo-fabricante">
+          <img [src]="obtenerLogoFabricante(clienteSeleccionadoHardware?.fabricante)" alt="Logo fabricante" />
+        </div>
+        <div class="detalles-fabricante">
+          <p><strong>Fabricante del sistema:</strong> {{ clienteSeleccionadoHardware?.fabricante || '---' }}</p>
+          <p><strong>Nombre del sistema:</strong> {{ clienteSeleccionadoHardware?.nombreSistema || '---' }}</p>
+          <p><strong>Versión del sistema:</strong> {{ clienteSeleccionadoHardware?.versionSistema || '---' }}</p>
+          <p><strong>Familia del sistema:</strong> {{ clienteSeleccionadoHardware?.familiaSistema || '---' }}</p>
+        </div>
       </div>
     </div>
-<div class="card card-3 card-cpu" [class.aparecer]="animarContenidoHardware">
-  <div class="logo-cpu">
-    <img [src]="obtenerLogoCPU(clienteSeleccionadoHardware?.cpu)" alt="Logo CPU" />
-  </div>
-  <div class="detalles-cpu">
-    <p><strong>CPU:</strong> {{ clienteSeleccionadoHardware?.cpu || '---' }}</p>
-    <p><strong>ID de la CPU:</strong> {{ clienteSeleccionadoHardware?.idCpu || '---' }}</p>
-  </div>
-</div>
 
+    <!-- Card 3: CPU -->
+    <div class="card card-3 card-cpu" [class.aparecer]="animarContenidoHardware">
+      <h4 class="titulo-card">Datos de la CPU</h4>
+      <div class="contenido-card">
+        <div class="logo-cpu">
+          <img [src]="obtenerLogoCPU(clienteSeleccionadoHardware?.cpu)" alt="Logo CPU" />
+        </div>
+        <div class="detalles-cpu">
+          <p><strong>CPU:</strong> {{ clienteSeleccionadoHardware?.cpu || '---' }}</p>
+          <p><strong>ID de la CPU:</strong> {{ clienteSeleccionadoHardware?.idCpu || '---' }}</p>
+        </div>
+      </div>
+    </div>
 
   </div>
 
   <div class="contenedor-inferior">
+    <!-- Tabla (sin título) -->
     <div class="card-2 card-4">
       <table class="tabla-hardware">
         <thead>
@@ -65,14 +76,16 @@
         </tbody>
       </table>
     </div>
+
+    <!-- Cards secundarias con título -->
     <div class="contenedor-doble-card">
       <div class="card card-5-info">
-        <h4 class="titulo-superior">Resumen del Sistema</h4>
+        <h4 class="titulo-card">Resumen del Sistema</h4>
         <p class="texto-superior"></p>
       </div>
 
       <div class="card card-5 grafico-donut">
-        <h3 class="titulo-donut">Memoria Disponible</h3>
+        <h4 class="titulo-card">Memoria Disponible</h4>
         <nz-progress [nzType]="'circle'" [nzPercent]="porcentajeMemoriaDisponible"
           [nzStrokeColor]="obtenerColorMemoria()" [nzFormat]="formatPorcentaje"></nz-progress>
         <p class="detalle-memoria">
@@ -80,7 +93,5 @@
         </p>
       </div>
     </div>
-
-
   </div>
 </div>
