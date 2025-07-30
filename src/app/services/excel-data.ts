@@ -34,6 +34,7 @@ export class ExcelData {
       .replace(/Ã/g, '');
   }
 
+  
   private tipoArchivoActivo: 'resumen' | 'hardware' | 'software' | null = null;
 
 setArchivoActivo(tipo: 'resumen' | 'hardware' | 'software'): void {

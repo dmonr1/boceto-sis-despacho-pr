@@ -11,57 +11,6 @@
   background: #AB0900 !important;
 }
 
-.swal-popup-custom {
-  border-radius: 16px !important;
-  padding: 24px 20px !important;
-  width: 420px !important;
-  height: 318px !important;
-  font-family: 'Segoe UI', sans-serif;
-}
-
-.swal-title-custom {
-  font-size: 16px !important;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 8px;
-}
-
-.swal-text-custom {
-  font-size: 13px !important;
-  color: #555;
-}
-
-.swal-button-custom {
-  background-color: #df2319 !important;
-  color: white !important;
-  border: none !important;
-  font-size: 13px !important;
-  padding: 6px 18px !important;
-  border-radius: 40px !important;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-}
-
-.swal-button-custom:hover {
-  background-color: #c21b13 !important;
-}
-
-div:where(.swal2-icon) {
-  position: relative;
-  box-sizing: content-box;
-  justify-content: center;
-  width: 5em;
-  height: 5em;
-  margin: 0.5em auto .6em !important;
-  zoom: var(--swal2-icon-zoom);
-  border: .25em solid rgba(0, 0, 0, 0);
-  border-radius: 50%;
-  border-color: #000;
-  font-family: inherit;
-  line-height: 5em;
-  cursor: default;
-  user-select: none;
-}
 
 @media print {
   body * {

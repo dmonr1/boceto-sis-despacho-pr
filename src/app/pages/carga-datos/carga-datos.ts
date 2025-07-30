@@ -1,170 +1,193 @@
 import { Component, ViewChild, ElementRef, OnInit } from '@angular/core';
-import * as XLSX from 'xlsx';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { NzIconModule } from 'ng-zorro-antd/icon';
-import Swal from 'sweetalert2';
-import { ExcelData } from '../../services/excel-data';
+import { Archivo } from '../../services/archivo';
+import { TipoArchivo } from '../../interfaces/archivo-excel';
+import { AlertaPersonalizada } from '../../components/alerta-personalizada/alerta-personalizada';
 
 @Component({
   selector: 'app-carga-datos',
   standalone: true,
-  imports: [CommonModule, NzIconModule],
+  imports: [CommonModule, NzIconModule, AlertaPersonalizada],
   templateUrl: './carga-datos.html',
   styleUrls: ['./carga-datos.scss']
 })
 export class CargaDatos implements OnInit {
   @ViewChild('inputArchivo') inputArchivo!: ElementRef<HTMLInputElement>;
 
-  datos: any[] = [];
-  columnas: string[] = [];
-  nombreArchivo: string = '';
-  tipoArchivo: 'resumen' | 'hardware' | 'software' | null = null;
+  nombreArchivo = '';
+  tipoArchivo: TipoArchivo | null = null;
+  archivosGuardados: any[] = [];
 
   cargaExitosa = false;
   ocultarMensaje = false;
-  mostrarDetalles = false;
-  mostrarTabla = false;
   cargandoArchivo = false;
-  cargandoTabla = false;
-  animarSalidaCard = false;
 
-  mostrarBotonVolver = false;
-  animarVolver = false;
-  animarSalidaVolver = false;
+  idUltimoAgregado: number | null = null;
+  idArchivoEliminar: number | null = null;
 
-  mostrarPanelTipos = true;
+  paginaActual = 1;
+  tamanioPagina = 10;
+  totalPaginas = 1;
+  archivosPaginados: any[] = [];
 
-  tiposArchivos: ('resumen' | 'hardware' | 'software')[] = ['resumen', 'hardware', 'software'];
+  // Alerta simple (notificación)
+  mostrarAlerta = false;
+  tipoAlerta: 'success' | 'error' | 'warning' = 'success';
+  mensajeAlerta = '';
 
-  nombresTipos: Record<'resumen' | 'hardware' | 'software', string> = {
-    resumen: 'Resumen',
-    hardware: 'Hardware',
-    software: 'Software'
-  };
+  // Alerta tipo pregunta (confirmación)
+  mostrarPregunta = false;
 
-  constructor(public excelData: ExcelData) {}
+  constructor(
+    private archivoService: Archivo,
+    private router: Router
+  ) { }
 
   ngOnInit(): void {
-    const tipo = this.excelData.getArchivoActivo();
-    if (!tipo) return;
-  
-    this.tipoArchivo = tipo;
-    this.datos = this.excelData.getDatosPorTipo(tipo);
-    this.columnas = this.excelData.getColumnasPorTipo(tipo);
-    this.nombreArchivo = this.excelData.getNombrePorTipo(tipo);
-  
-    if (this.datos.length > 0 && this.columnas.length > 0) {
-      this.mostrarDetalles = true;
-      this.mostrarPanelTipos = true;
-    }
+    this.cargarTodosLosArchivos();
   }
-  
+
+  mostrarNotificacion(tipo: 'success' | 'error' | 'warning', mensaje: string) {
+    this.tipoAlerta = tipo;
+    this.mensajeAlerta = mensaje;
+    this.mostrarAlerta = true;
+  }
+
+  cerrarNotificacion() {
+    this.mostrarAlerta = false;
+  }
+
+
+  cargarTodosLosArchivos() {
+    this.archivoService.listarTodos().subscribe({
+      next: (archivos) => {
+        this.archivosGuardados = archivos;
+        this.totalPaginas = Math.ceil(this.archivosGuardados.length / this.tamanioPagina);
+        this.actualizarPaginacion();
+
+        setTimeout(() => {
+          this.idUltimoAgregado = null;
+        }, 3000);
+      },
+      error: (err) => {
+        console.error('Error al listar archivos:', err);
+      }
+    });
+  }
+
   seleccionarArchivo() {
     this.inputArchivo.nativeElement.value = '';
     this.inputArchivo.nativeElement.click();
   }
 
-  onFileChange(event: any) {
+  async calcularHash(file: File): Promise<string> {
+    const buffer = await file.arrayBuffer();
+    const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  async onFileChange(event: any) {
     const archivo: File = event.target.files[0];
     if (!archivo) return;
-
+  
+    // Desactiva input mientras se procesa
+    this.inputArchivo.nativeElement.disabled = true;
+  
     const nombre = archivo.name;
     const tipo = this.detectarTipo(nombre);
-
     if (!tipo) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Archivo inválido',
-        text: 'El nombre del archivo debe incluir "Resumen", "Hardware" o "Software".',
-        confirmButtonText: 'Aceptar'
-      });
+      this.mostrarNotificacion('error', 'El nombre del archivo debe incluir "Resumen", "Hardware" o "Software".');
+      this.inputArchivo.nativeElement.disabled = false;
       return;
     }
-
-    const nombrePrevio = this.excelData.getNombrePorTipo(tipo);
-    if (nombrePrevio === nombre) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Archivo duplicado',
-        text: 'Ya has cargado este archivo. Selecciona uno diferente.',
-        confirmButtonText: 'Aceptar'
-      });
-      this.inputArchivo.nativeElement.value = '';
-      return;
-    }
-
-    this.nombreArchivo = nombre;
-    this.tipoArchivo = tipo;
-    this.mostrarDetalles = false;
-    this.mostrarTabla = false;
-    this.animarSalidaCard = false;
-    this.cargaExitosa = false;
-    this.ocultarMensaje = false;
-    this.cargandoArchivo = true;
-
-    const lector = new FileReader();
-    lector.onload = (e: any) => {
-      const datosBinarios = e.target.result;
-      const libro = XLSX.read(datosBinarios, { type: 'binary' });
-      const hoja = libro.Sheets[libro.SheetNames[0]];
-      const datos = XLSX.utils.sheet_to_json(hoja, { defval: '' });
-      const columnas = Object.keys(datos[0] || {});
-
-      this.datos = datos;
-      this.columnas = columnas;
-      this.excelData.setDatosPorTipo(tipo, datos, columnas, nombre);
-
-      this.cargandoArchivo = false;
-      this.cargaExitosa = true;
-
-      setTimeout(() => (this.ocultarMensaje = true), 1000);
-      setTimeout(() => {
+  
+    // Asegura lista actualizada desde backend
+    this.archivoService.listarTodos().subscribe({
+      next: async (archivos) => {
+        this.archivosGuardados = archivos;
+  
+        const hash = await this.calcularHash(archivo);
+        const hashYaExiste = this.archivosGuardados.some(a => a.hashContenido === hash);
+  
+        if (hashYaExiste) {
+          this.mostrarNotificacion('warning', 'Ya existe un archivo con el mismo contenido.');
+          this.inputArchivo.nativeElement.disabled = false;
+          return;
+        }
+  
+        // Continúa con la subida si no hay duplicado
+        this.nombreArchivo = nombre;
+        this.tipoArchivo = tipo;
         this.cargaExitosa = false;
-        this.mostrarDetalles = true;
-      }, 2000);
-    };
-
-    lector.readAsBinaryString(archivo);
-  }
-
-  verTabla() {
-    this.animarSalidaCard = true;
-    this.animarSalidaPanelTipos = true;
+        this.ocultarMensaje = false;
+        this.cargandoArchivo = true;
   
-    setTimeout(() => {
-      this.mostrarPanelTipos = false;
-      this.mostrarDetalles = false;
-      this.cargandoTabla = true;
-    }, 700);
+        this.archivoService.subirArchivo(archivo, tipo).subscribe({
+          next: (respuesta) => {
+            this.cargandoArchivo = false;
+            this.cargaExitosa = true;
+            this.idUltimoAgregado = respuesta?.id ?? null;
   
-    setTimeout(() => {
-      this.cargandoTabla = false;
-      this.mostrarTabla = true;
-      this.mostrarBotonVolver = true;
-      setTimeout(() => (this.animarVolver = true), 10);
-    }, 1000);
-  }
+            setTimeout(() => (this.ocultarMensaje = true), 1000);
+            setTimeout(() => {
+              this.cargaExitosa = false;
+              this.cargarTodosLosArchivos();
+            }, 2000);
   
-
-  volverADetalles() {
-    this.animarVolver = false;
-    this.animarSalidaVolver = true;
-  
-    this.mostrarTabla = false;
-    this.cargaExitosa = false;
-    this.ocultarMensaje = false;
-    this.animarSalidaCard = false;
-  
-    setTimeout(() => {
-      this.mostrarBotonVolver = false;
-      this.animarSalidaVolver = false;
-      this.mostrarDetalles = true;
-      this.mostrarPanelTipos = true;
-      this.animarSalidaPanelTipos = false;
-    }, 400);
+            this.mostrarNotificacion('success', 'Archivo cargado exitosamente.');
+            this.inputArchivo.nativeElement.disabled = false;
+          },
+          error: (err) => {
+            this.cargandoArchivo = false;
+            console.error('Error al subir archivo:', err);
+            this.mostrarNotificacion('error', 'No se pudo subir el archivo.');
+            this.inputArchivo.nativeElement.disabled = false;
+          }
+        });
+      },
+      error: (err) => {
+        console.error('Error al listar archivos:', err);
+        this.mostrarNotificacion('error', 'Error al obtener archivos para validar duplicado.');
+        this.inputArchivo.nativeElement.disabled = false;
+      }
+    });
   }
   
-  private detectarTipo(nombre: string): 'resumen' | 'hardware' | 'software' | null {
+
+  eliminarArchivo(id: number) {
+    this.idArchivoEliminar = id;
+    this.mostrarPregunta = true;
+  }
+
+  confirmarEliminacion() {
+    if (this.idArchivoEliminar !== null) {
+      this.archivoService.eliminarArchivo(this.idArchivoEliminar).subscribe({
+        next: () => {
+          this.tipoAlerta = 'success'; // fuerza el tipo
+          this.mostrarNotificacion('success', 'El archivo ha sido eliminado.');
+          this.cargarTodosLosArchivos();
+        },
+        error: () => {
+          this.tipoAlerta = 'error';
+          this.mostrarNotificacion('error', 'No se pudo eliminar el archivo.');
+        },
+        complete: () => {
+          this.idArchivoEliminar = null;
+          this.mostrarPregunta = false;
+        }
+      });
+    }
+  }
+
+  cancelarEliminacion() {
+    this.idArchivoEliminar = null;
+    this.mostrarPregunta = false;
+  }
+
+  private detectarTipo(nombre: string): TipoArchivo | null {
     const lower = nombre.toLowerCase();
     if (lower.includes('resumen')) return 'resumen';
     if (lower.includes('hardware')) return 'hardware';
@@ -172,44 +195,19 @@ export class CargaDatos implements OnInit {
     return null;
   }
 
-  eliminarArchivo(tipo: 'resumen' | 'hardware' | 'software'): void {
-    this.excelData.eliminarPorTipo(tipo);
-
-    if (this.tipoArchivo === tipo) {
-      this.tipoArchivo = null;
-      this.datos = [];
-      this.columnas = [];
-      this.nombreArchivo = '';
-      this.mostrarDetalles = false;
-      this.mostrarTabla = false;
-      this.mostrarBotonVolver = false;
-    }
+  cambiarPagina(pagina: number) {
+    if (pagina < 1 || pagina > this.totalPaginas) return;
+    this.paginaActual = pagina;
+    this.actualizarPaginacion();
   }
 
-  mostrarAlerta = false;
-  alertaTitulo = '';
-  alertaMensaje = '';
-  tipoPendienteEliminar: 'resumen' | 'hardware' | 'software' | null = null;
-
-  mostrarAlertaEliminar(tipo: 'resumen' | 'hardware' | 'software') {
-    this.alertaTitulo = '¿Estás seguro?';
-    this.alertaMensaje = `¿Deseas eliminar el archivo cargado de tipo "${this.nombresTipos[tipo]}"?`;
-    this.tipoPendienteEliminar = tipo;
-    this.mostrarAlerta = true;
+  actualizarPaginacion() {
+    const inicio = (this.paginaActual - 1) * this.tamanioPagina;
+    const fin = inicio + this.tamanioPagina;
+    this.archivosPaginados = this.archivosGuardados.slice(inicio, fin);
   }
 
-  cancelarAlerta() {
-    this.mostrarAlerta = false;
-    this.tipoPendienteEliminar = null;
+  verDashboard(archivo: any) {
+    this.router.navigate(['/lista-clientes']);
   }
-
-  confirmarAlerta() {
-    if (this.tipoPendienteEliminar) {
-      this.eliminarArchivo(this.tipoPendienteEliminar);
-    }
-    this.mostrarAlerta = false;
-  }
-
-animarSalidaPanelTipos = false;
-
 }

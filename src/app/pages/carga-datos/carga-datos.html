@@ -1,90 +1,83 @@
 <div class="contenedor-general">
-  <div class="contenedor-boton">
-
-    <div class="contenedor-btns">
-      <button class="btn-importar" (click)="seleccionarArchivo()">
-        <img src="assets/icons/icon-excel.png" alt="Excel" class="icono-excel" />
-        Importar archivo Excel
-      </button>
-
-      <div *ngIf="mostrarBotonVolver" class="boton-volver" [class.animar-aparecer]="animarVolver"
-        [class.animar-salir]="animarSalidaVolver" (click)="volverADetalles()">
-        <svg xmlns="http://www.w3.org/2000/svg" class="icono-volver" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-          stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
-        </svg>
-        <span class="texto-volver">Volver a detalles</span>
-      </div>
-    </div>
-
-    <div class="mensaje-exito-inline" [class.visible]="cargaExitosa" [class.ocultar]="ocultarMensaje">
-      <span nz-icon nzType="check-circle" nzTheme="outline" class="icono-exito"></span>
-      <span class="texto-exito">Carga exitosa</span>
-    </div>
+  <div class="contenedor-importar">
+    <button class="btn-importar" (click)="seleccionarArchivo()">
+      <img src="assets/icons/icon-excel.png" alt="Excel" class="icono-excel" />
+      Importar archivo Excel
+    </button>
 
     <input type="file" #inputArchivo (change)="onFileChange($event)" accept=".xlsx, .xls" hidden />
   </div>
 
-  <div *ngIf="cargandoArchivo" class="spinner-carga-archivo">
-    <nz-icon nzType="loading" nzTheme="outline" class="spinner-icon"></nz-icon>
-  </div>
-
-  <div *ngIf="cargandoTabla" class="spinner-carga-tabla">
-    <nz-icon nzType="loading" nzTheme="outline" class="spinner-icon"></nz-icon>
-    <span class="spinner-text">Cargando...</span>
-  </div>
-
-  <div class="panel-tipos" *ngIf="mostrarPanelTipos" [ngClass]="{ salir: animarSalidaPanelTipos }">
-    <h4>Archivos cargados</h4>
-    <div class="tipo-opcion" *ngFor="let tipo of tiposArchivos" [class.activo]="excelData.isCargado(tipo)">
-      <div class="circulo-estado"></div>
-      <span class="nombre-tipo">{{ nombresTipos[tipo] }}</span>
-
-      <!-- Ícono de eliminar personalizado -->
-      <span *ngIf="excelData.isCargado(tipo)" nz-icon nzType="delete" nzTheme="outline" class="icono-eliminar"
-        (click)="mostrarAlertaEliminar(tipo)">
-      </span>
-    </div>
-  </div>
-
-
-  <div class="alerta-overlay" *ngIf="mostrarAlerta">
-    <div class="alerta-container">
-      <h3 class="alerta-titulo">{{ alertaTitulo }}</h3>
-      <p class="alerta-mensaje">{{ alertaMensaje }}</p>
-      <div class="alerta-botones">
-        <button class="btn-cancelar" (click)="cancelarAlerta()">Cancelar</button>
-        <button class="btn-confirmar" (click)="confirmarAlerta()">Aceptar</button>
+  <div class="tabla-archivos">
+    <div class="cabecera-tabla">
+      <h3 class="tabla-titulo">Archivos guardados en base de datos</h3>
+      <div class="contador-registros">
+        N° de registros: <span class="numero-pill">{{ archivosPaginados.length }}</span>
       </div>
     </div>
-  </div>
 
+    <div class="tabla-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Fecha de carga</th>
+            <th>Tipo</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="archivosGuardados.length === 0">
+            <td colspan="5" class="fila-vacia">Aún no se han ingresado archivos</td>
+          </tr>
+          <tr *ngFor="let archivo of archivosPaginados" [class.fila-nueva]="archivo.id === idUltimoAgregado">
+            <td>{{ archivo.id }}</td>
+            <td>{{ archivo.nombreArchivo }}</td>
+            <td>{{ archivo.fechaSubida | date: 'dd/MM/yyyy - hh:mm a' }}</td>
+            <td>{{ archivo.tipoArchivo }}</td>
+            <td>
+              <div class="acciones-botones">
+                <button class="btn-eliminar" (click)="eliminarArchivo(archivo.id)">
+                  <span nz-icon nzType="delete" nzTheme="outline"></span>
+                  Eliminar
+                </button>
 
+                <button class="btn-ver-dashboard" (click)="verDashboard(archivo)">
+                  <span nz-icon nzType="appstore" nzTheme="outline"></span>
+                  Ver dashboard
+                </button>
+              </div>
+            </td>
 
+          </tr>
+        </tbody>
 
-  <div class="card-detalles" *ngIf="mostrarDetalles" [class.salir]="animarSalidaCard">
-    <h3>Detalles del archivo</h3>
-    <p class="resumen"><strong>Archivo:</strong> {{ nombreArchivo }}</p>
-    <p class="resumen"><strong>Número de filas:</strong> {{ datos.length }}</p>
-    <p class="resumen"><strong>Número de columnas:</strong> {{ columnas.length }}</p>
-    <button class="btn-ver-tabla" (click)="verTabla()">
-      <span nz-icon nzType="eye" nzTheme="outline"></span>
-      Ver tabla
-    </button>
-  </div>
+      </table>
+    </div>
 
-  <div class="tabla-contenedor" *ngIf="mostrarTabla">
-    <table>
-      <thead>
-        <tr>
-          <th *ngFor="let col of columnas">{{ col }}</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let fila of datos">
-          <td *ngFor="let col of columnas">{{ fila[col] }}</td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="paginacion" *ngIf="totalPaginas > 1">
+      <button (click)="cambiarPagina(paginaActual - 1)" [disabled]="paginaActual === 1">Anterior</button>
+      <span>Página {{ paginaActual }} de {{ totalPaginas }}</span>
+      <button (click)="cambiarPagina(paginaActual + 1)" [disabled]="paginaActual === totalPaginas">Siguiente</button>
+    </div>
   </div>
 </div>
+
+<app-alerta-personalizada
+  [visible]="mostrarAlerta"
+  [tipo]="tipoAlerta"
+  [mensaje]="mensajeAlerta"
+  (aceptar)="cerrarNotificacion()"
+  (cancelar)="cerrarNotificacion()">
+</app-alerta-personalizada>
+
+
+<!-- Alerta de confirmación -->
+<app-alerta-personalizada
+  [visible]="mostrarPregunta"
+  [tipo]="'question'"
+  [mensaje]="'¿Estás seguro de eliminar este archivo?'"
+  (aceptar)="confirmarEliminacion()"
+  (cancelar)="cancelarEliminacion()">
+</app-alerta-personalizada>

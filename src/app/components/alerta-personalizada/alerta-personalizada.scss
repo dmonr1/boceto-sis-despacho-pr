@@ -1,0 +1,91 @@
+.alerta-container {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(0, 0, 0, 0.45); // fondo oscuro
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+  }
+  
+  .alerta {
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px;
+    width: 320px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    position: relative;
+    text-align: center;
+    animation: fadeIn 0.3s ease-in-out;
+  
+    &.pregunta {
+      padding-top: 30px;
+    }
+  
+    .icono-alerta {
+      font-size: 40px !important;
+      margin-bottom: 12px;
+      display: block;
+    }
+  
+    .mensaje {
+      display: block;
+      margin-bottom: 16px;
+      font-size: 16px;
+      color: #333;
+    }
+  
+    .acciones {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 10px;
+  
+      .btn {
+        padding: 6px 14px;
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.2s ease-in-out;
+      }
+  
+      .btn-confirmar {
+        background-color: #ff4d4f;
+        color: white;
+        border: none;
+  
+        &:hover {
+          background-color: #d9363e;
+        }
+      }
+  
+      .btn-cancelar {
+        background-color: #f0f0f0;
+        color: #333;
+        border: none;
+  
+        &:hover {
+          background-color: #d9d9d9;
+        }
+      }
+    }
+  
+    .cerrar {
+      position: absolute;
+      top: 8px;
+      right: 12px;
+      font-size: 20px;
+      cursor: pointer;
+      color: #999;
+  
+      &:hover {
+        color: #555;
+      }
+    }
+  }
+  
+  // Animación fade-in
+  @keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  
