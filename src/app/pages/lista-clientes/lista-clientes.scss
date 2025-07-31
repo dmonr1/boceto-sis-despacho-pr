@@ -46,6 +46,36 @@
     color: #444;
 }
 
+.info-clientes {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+
+.btn-cambiar-archivo {
+  padding: 7px 16px;
+  background: linear-gradient(135deg, #df2319, #c21a0e);
+  color: #fff;
+  border: none;
+  border-radius: 30px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(223, 35, 25, 0.3);
+
+  &:hover {
+    transform: scale(1.01);
+    box-shadow: 0 6px 16px rgba(223, 35, 25, 0.45);
+  }
+
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+
 .btn-buscar {
     padding: 7px 24px;
     background: linear-gradient(135deg, #faaa3b, #ee9a24);

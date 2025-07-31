@@ -125,7 +125,7 @@
 }
 
 .tabla-archivos {
-  margin-top: 30px;
+  margin-top: 20px;
   width: 100%;
   max-width: 900px;
   padding: 0 20px;
@@ -257,16 +257,22 @@
 }
 
 @keyframes desplegarFila {
-  from {
+  0% {
     opacity: 0;
-    transform: translateY(-20px) scaleY(0.9);
+    transform: translateY(-40px) scaleY(0.95);
   }
 
-  to {
+  60% {
+    opacity: 1;
+    transform: translateY(10px) scaleY(1.01);
+  }
+
+  100% {
     opacity: 1;
     transform: translateY(0) scaleY(1);
   }
 }
+
 
 .fila-nueva {
   animation: desplegarFila 0.6s ease-out;
@@ -277,7 +283,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 
   .tabla-titulo {
     font-size: 16px;

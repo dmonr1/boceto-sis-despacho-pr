@@ -13,6 +13,5 @@ export const routes: Routes = [
   { path: 'carga-datos', component: CargaDatos, canActivate: [AuthGuard] },
   { path: 'lista-clientes', component: ListaClientes, canActivate: [AuthGuard] },
   { path: 'cliente-hardware', component: ClienteHardware, canActivate: [AuthGuard] },
+  { path: 'dashboard/:tipo/:id', component: ListaClientes, canActivate: [AuthGuard] }, // 👈 nueva ruta
 ];
-
-

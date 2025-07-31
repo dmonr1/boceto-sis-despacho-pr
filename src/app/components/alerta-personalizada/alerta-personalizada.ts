@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { CommonModule } from '@angular/common';
 
@@ -9,7 +9,8 @@ import { CommonModule } from '@angular/common';
   templateUrl: './alerta-personalizada.html',
   styleUrl: './alerta-personalizada.scss'
 })
-export class AlertaPersonalizada implements OnInit {
+
+export class AlertaPersonalizada implements OnInit, OnChanges {
   @Input() tipo: 'success' | 'error' | 'warning' | 'question' = 'success';
   @Input() mensaje: string = '';
   @Input() visible: boolean = false;
@@ -20,8 +21,18 @@ export class AlertaPersonalizada implements OnInit {
   icono = '';
   color = '';
   esPregunta = false;
+  cerrarAnimando = false;
 
   ngOnInit(): void {
+    this.aplicarTipo();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['tipo']) this.aplicarTipo();
+  }
+
+  aplicarTipo() {
+    this.esPregunta = false;
     switch (this.tipo) {
       case 'success':
         this.icono = 'check-circle';
@@ -44,18 +55,23 @@ export class AlertaPersonalizada implements OnInit {
   }
 
   onAceptar() {
-    this.aceptar.emit();
-    this.visible = false; // se cierra la alerta al aceptar
+    this.emitirCerrar(() => this.aceptar.emit());
   }
-  
+
   onCancelar() {
-    this.cancelar.emit();
-    this.visible = false; // se cierra también al cancelar
+    this.emitirCerrar(() => this.cancelar.emit());
   }
-  
+
   cerrar() {
-    this.visible = false;
-    this.cancelar.emit();
+    this.emitirCerrar(() => this.cancelar.emit());
   }
-  
+
+  private emitirCerrar(callback: () => void) {
+    this.cerrarAnimando = true;
+    setTimeout(() => {
+      this.visible = false;
+      this.cerrarAnimando = false;
+      callback();
+    }, 300); 
+  }
 }

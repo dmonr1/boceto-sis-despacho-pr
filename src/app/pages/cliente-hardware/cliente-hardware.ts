@@ -39,7 +39,7 @@ clienteSeleccionadoHardware: {
     const columnasDeseadas = [
       'Cliente',
       'CPU',
-      'ID de la CPU', // ← agrega esta línea
+      'ID de la CPU', 
       'Fabricante del sistema',
       'Nombre del sistema',
       'Versión del sistema',
@@ -50,6 +50,7 @@ clienteSeleccionadoHardware: {
       'Memoria total disponible'
     ];
 
+    
 
     const datos = this.excelData.getDatosPorTipo('hardware');
     console.log('Datos hardware:', datos);
@@ -66,6 +67,8 @@ clienteSeleccionadoHardware: {
       this.seleccionarClienteHardware(this.datosHardware[0]);
     }
   }
+
+  
 
   get letraAvatarHardware(): string {
     return this.clienteSeleccionadoHardware?.cliente?.charAt(0)?.toUpperCase() || '-';

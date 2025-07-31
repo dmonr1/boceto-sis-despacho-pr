@@ -34,7 +34,7 @@
           <tr *ngFor="let archivo of archivosPaginados" [class.fila-nueva]="archivo.id === idUltimoAgregado">
             <td>{{ archivo.id }}</td>
             <td>{{ archivo.nombreArchivo }}</td>
-            <td>{{ archivo.fechaSubida | date: 'dd/MM/yyyy - hh:mm a' }}</td>
+            <td>{{ archivo.fechaSubida | date: 'dd/MM/yyyy - hh:mm a' }}</td> 
             <td>{{ archivo.tipoArchivo }}</td>
             <td>
               <div class="acciones-botones">

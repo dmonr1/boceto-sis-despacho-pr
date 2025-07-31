@@ -2,10 +2,16 @@
     <div class="lado-izquierdo">
         <h2 class="subtitulo">Buscar Clientes:</h2>
         <div class="busqueda">
-            <input type="text" class="input-busqueda" placeholder="Ingrese cliente" [(ngModel)]="textoBusqueda" />
+            <input type="text" class="input-busqueda" placeholder="Ingrese cliente" [(ngModel)]="textoBusqueda"
+                (keyup.enter)="filtrarClientes()" />
             <button class="btn-buscar" (click)="filtrarClientes()">Buscar</button>
-            <span class="contador-clientes">N° Clientes: {{ datosFiltrados.length }}</span>
+
+            <div class="info-clientes">
+                <span class="contador-clientes">N° Clientes: {{ datosFiltrados.length }}</span>
+                <button class="btn-cambiar-archivo">Cambiar archivo resumen</button>
+            </div>
         </div>
+
 
         <div class="card-clientes">
             <table class="tabla-clientes">
@@ -20,25 +26,22 @@
                 <tbody>
                     <tr *ngIf="datosFiltrados.length === 0">
                         <td colspan="4" class="sin-datos">
-                            Por favor ingresar un archivo, para visulizar clientes.
+                            Por favor ingresar un archivo, para visualizar clientes.
                         </td>
                     </tr>
                     <tr *ngFor="let fila of datosFiltrados" (click)="seleccionarCliente(fila)"
                         [class.selected]="clienteSeleccionado?.cliente === fila.cliente" style="cursor: pointer;">
-                        <td>{{ fila.cliente }}</td>
-                        <td>{{ fila.ipv4 }}</td>
-                        <td>{{ fila.estado }}</td>
-                        <td>{{ fila.version }}</td>
+                        <td>{{ obtenerValorSeguro(fila.cliente) }}</td>
+                        <td>{{ obtenerValorSeguro(fila.ipv4) }}</td>
+                        <td>{{ obtenerValorSeguro(fila.estado) }}</td>
+                        <td>{{ obtenerValorSeguro(fila.version) }}</td>
                     </tr>
-
                 </tbody>
             </table>
         </div>
-
     </div>
 
     <div class="lado-derecho" id="zona-imprimir">
-
         <div class="card-superior">
             <div class="avatar-derecha-fondo" [class.aparecer]="animarContenido">
                 <nz-avatar [nzText]="letraAvatar" class="avatar-responsive"></nz-avatar>
@@ -46,11 +49,12 @@
 
             <div class="grupo-izquierdo">
                 <div class="contenido-superior">
-                    <p>Cliente: <span>{{ clienteSeleccionado?.cliente || 'No reconocido' }}</span></p>
-                    <p>Dirección IPv4: <span>{{ clienteSeleccionado?.ipv4 || 'Por asignar' }}</span></p>
+                    <p>Cliente: <span>{{ obtenerValorSeguro(clienteSeleccionado?.cliente) }}</span></p>
+                    <p>Dirección IPv4: <span>{{ obtenerValorSeguro(clienteSeleccionado?.ipv4, 'Por asignar') }}</span>
+                    </p>
                     <p>
                         Estado de seguridad:
-                        <span>{{ clienteSeleccionado?.estado || 'Por determinar' }}</span>
+                        <span>{{ obtenerValorSeguro(clienteSeleccionado?.estado, 'Por determinar') }}</span>
                         <nz-icon *ngIf="clienteSeleccionado?.estado" [nzType]="iconoEstado"
                             [ngStyle]="{ color: colorEstado, 'font-size': '20px', 'margin-left': '6px' }">
                         </nz-icon>
@@ -64,47 +68,47 @@
 
             <div class="grupo-dato">
                 <span class="etiqueta">Motor A:</span>
-                <span class="valor">{{ clienteSeleccionado?.motorA || '---' }}</span>
+                <span class="valor">{{ obtenerValorSeguro(clienteSeleccionado?.motorA) }}</span>
             </div>
 
             <div class="grupo-dato">
                 <span class="etiqueta">Motor B:</span>
-                <span class="valor">{{ clienteSeleccionado?.motorB || '---' }}</span>
+                <span class="valor">{{ obtenerValorSeguro(clienteSeleccionado?.motorB) }}</span>
             </div>
 
             <div class="grupo-dato">
                 <span class="etiqueta">Versión de G DATA Security Client:</span>
-                <span class="valor">{{ clienteSeleccionado?.version || '---' }}</span>
+                <span class="valor">{{ obtenerValorSeguro(clienteSeleccionado?.version) }}</span>
             </div>
 
             <div class="grupo-dato">
                 <span class="etiqueta">Componentes de seguridad:</span>
-                <span class="valor">{{ clienteSeleccionado?.componentes || '---' }}</span>
+                <span class="valor">{{ obtenerValorSeguro(clienteSeleccionado?.componentes) }}</span>
             </div>
 
             <div class="grupo-dato">
                 <span class="etiqueta">Es necesario reiniciar:</span>
-                <span class="valor">{{ clienteSeleccionado?.reiniciar || '---' }}</span>
+                <span class="valor">{{ obtenerValorSeguro(clienteSeleccionado?.reiniciar) }}</span>
             </div>
 
             <div class="grupo-dato">
                 <span class="etiqueta">Última sincronización:</span>
-                <span class="valor">{{ clienteSeleccionado?.ultimaSync || '---' }}</span>
+                <span class="valor">{{ obtenerValorSeguro(clienteSeleccionado?.ultimaSync) }}</span>
             </div>
 
             <div class="grupo-dato">
                 <span class="etiqueta">Actualizar base de datos de virus / fecha:</span>
-                <span class="valor">{{ clienteSeleccionado?.actualizarVirus || '---' }}</span>
+                <span class="valor">{{ obtenerValorSeguro(clienteSeleccionado?.actualizarVirus) }}</span>
             </div>
 
             <div class="grupo-dato">
                 <span class="etiqueta">Actualizar archivos de programa / fecha:</span>
-                <span class="valor">{{ clienteSeleccionado?.actualizarProgramas || '---' }}</span>
+                <span class="valor">{{ obtenerValorSeguro(clienteSeleccionado?.actualizarProgramas) }}</span>
             </div>
 
             <div class="grupo-dato">
                 <span class="etiqueta">Tipo:</span>
-                <span class="valor">{{ clienteSeleccionado?.tipo || '---' }}</span>
+                <span class="valor">{{ obtenerValorSeguro(clienteSeleccionado?.tipo) }}</span>
             </div>
 
             <div class="contenedor-boton-pdf">
@@ -114,6 +118,5 @@
                 </button>
             </div>
         </div>
-
     </div>
 </div>

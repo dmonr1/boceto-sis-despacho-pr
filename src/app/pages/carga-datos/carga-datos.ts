@@ -5,6 +5,7 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
 import { Archivo } from '../../services/archivo';
 import { TipoArchivo } from '../../interfaces/archivo-excel';
 import { AlertaPersonalizada } from '../../components/alerta-personalizada/alerta-personalizada';
+import * as XLSX from 'xlsx';
 
 @Component({
   selector: 'app-carga-datos',
@@ -32,12 +33,10 @@ export class CargaDatos implements OnInit {
   totalPaginas = 1;
   archivosPaginados: any[] = [];
 
-  // Alerta simple (notificación)
   mostrarAlerta = false;
   tipoAlerta: 'success' | 'error' | 'warning' = 'success';
   mensajeAlerta = '';
 
-  // Alerta tipo pregunta (confirmación)
   mostrarPregunta = false;
 
   constructor(
@@ -59,23 +58,30 @@ export class CargaDatos implements OnInit {
     this.mostrarAlerta = false;
   }
 
-
   cargarTodosLosArchivos() {
     this.archivoService.listarTodos().subscribe({
       next: (archivos) => {
-        this.archivosGuardados = archivos;
+        this.archivosGuardados = archivos.sort((a, b) => {
+          return new Date(b.fechaSubida).getTime() - new Date(a.fechaSubida).getTime();
+        });
+
         this.totalPaginas = Math.ceil(this.archivosGuardados.length / this.tamanioPagina);
         this.actualizarPaginacion();
 
         setTimeout(() => {
-          this.idUltimoAgregado = null;
-        }, 3000);
+          const filaNueva = document.querySelector('.fila-nueva');
+          if (filaNueva) {
+            filaNueva.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 300);
       },
       error: (err) => {
         console.error('Error al listar archivos:', err);
+        this.mostrarNotificacion('error', 'No hay respuesta del servidor. Intente más tarde.');
       }
     });
   }
+
 
   seleccionarArchivo() {
     this.inputArchivo.nativeElement.value = '';
@@ -92,10 +98,9 @@ export class CargaDatos implements OnInit {
   async onFileChange(event: any) {
     const archivo: File = event.target.files[0];
     if (!archivo) return;
-  
-    // Desactiva input mientras se procesa
+
     this.inputArchivo.nativeElement.disabled = true;
-  
+
     const nombre = archivo.name;
     const tipo = this.detectarTipo(nombre);
     if (!tipo) {
@@ -103,59 +108,56 @@ export class CargaDatos implements OnInit {
       this.inputArchivo.nativeElement.disabled = false;
       return;
     }
-  
-    // Asegura lista actualizada desde backend
+
     this.archivoService.listarTodos().subscribe({
       next: async (archivos) => {
         this.archivosGuardados = archivos;
-  
+
         const hash = await this.calcularHash(archivo);
         const hashYaExiste = this.archivosGuardados.some(a => a.hashContenido === hash);
-  
+
         if (hashYaExiste) {
           this.mostrarNotificacion('warning', 'Ya existe un archivo con el mismo contenido.');
           this.inputArchivo.nativeElement.disabled = false;
           return;
         }
-  
-        // Continúa con la subida si no hay duplicado
+
         this.nombreArchivo = nombre;
         this.tipoArchivo = tipo;
         this.cargaExitosa = false;
         this.ocultarMensaje = false;
         this.cargandoArchivo = true;
-  
+
         this.archivoService.subirArchivo(archivo, tipo).subscribe({
           next: (respuesta) => {
             this.cargandoArchivo = false;
             this.cargaExitosa = true;
             this.idUltimoAgregado = respuesta?.id ?? null;
-  
+
             setTimeout(() => (this.ocultarMensaje = true), 1000);
             setTimeout(() => {
               this.cargaExitosa = false;
               this.cargarTodosLosArchivos();
             }, 2000);
-  
+
             this.mostrarNotificacion('success', 'Archivo cargado exitosamente.');
             this.inputArchivo.nativeElement.disabled = false;
           },
           error: (err) => {
             this.cargandoArchivo = false;
             console.error('Error al subir archivo:', err);
-            this.mostrarNotificacion('error', 'No se pudo subir el archivo.');
+            this.mostrarNotificacion('error', 'No hay respuesta del servidor. Intente más tarde.');
             this.inputArchivo.nativeElement.disabled = false;
           }
         });
       },
       error: (err) => {
         console.error('Error al listar archivos:', err);
-        this.mostrarNotificacion('error', 'Error al obtener archivos para validar duplicado.');
+        this.mostrarNotificacion('error', 'No se pudo verificar archivos. Verifique su conexión.');
         this.inputArchivo.nativeElement.disabled = false;
       }
     });
   }
-  
 
   eliminarArchivo(id: number) {
     this.idArchivoEliminar = id;
@@ -166,13 +168,14 @@ export class CargaDatos implements OnInit {
     if (this.idArchivoEliminar !== null) {
       this.archivoService.eliminarArchivo(this.idArchivoEliminar).subscribe({
         next: () => {
-          this.tipoAlerta = 'success'; // fuerza el tipo
+          this.tipoAlerta = 'success';
           this.mostrarNotificacion('success', 'El archivo ha sido eliminado.');
           this.cargarTodosLosArchivos();
         },
-        error: () => {
+        error: (err) => {
+          console.error('Error al eliminar archivo:', err);
           this.tipoAlerta = 'error';
-          this.mostrarNotificacion('error', 'No se pudo eliminar el archivo.');
+          this.mostrarNotificacion('error', 'No hay respuesta del servidor. No se pudo eliminar el archivo.');
         },
         complete: () => {
           this.idArchivoEliminar = null;
@@ -207,7 +210,18 @@ export class CargaDatos implements OnInit {
     this.archivosPaginados = this.archivosGuardados.slice(inicio, fin);
   }
 
-  verDashboard(archivo: any) {
-    this.router.navigate(['/lista-clientes']);
+verDashboard(archivo: any) {
+  sessionStorage.setItem('archivoResumAct', JSON.stringify({ id: archivo.id, tipo: archivo.tipoArchivo }));
+
+  const tipo = archivo.tipoArchivo;
+  const id = archivo.id;
+
+  if (tipo === 'resumen') {
+    this.router.navigate(['/dashboard/resumen', id]);
+  } else if (tipo === 'hardware') {
+    this.router.navigate(['/dashboard/hardware', id]);
+  } else if (tipo === 'software') {
+    this.router.navigate(['/dashboard/software', id]);
   }
+}
 }
