@@ -1,99 +1,124 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ExcelData } from '../../services/excel-data';
+import { FormsModule } from '@angular/forms';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzAvatarModule } from 'ng-zorro-antd/avatar';
 import { NzProgressModule } from 'ng-zorro-antd/progress';
+import { Archivo } from '../../services/archivo';
+import { AlertaPersonalizada } from '../../components/alerta-personalizada/alerta-personalizada';
+import { read, utils } from 'xlsx';
 
 @Component({
   selector: 'app-cliente-hardware',
   standalone: true,
-  imports: [CommonModule, NzIconModule, NzAvatarModule, NzProgressModule],
+  imports: [CommonModule, FormsModule, NzIconModule, NzAvatarModule, NzProgressModule, AlertaPersonalizada],
   templateUrl: './cliente-hardware.html',
   styleUrl: './cliente-hardware.scss'
 })
 export class ClienteHardware implements OnInit {
-
   datosHardware: any[] = [];
 
   memoriaDisponibleGB: number = 0;
   memoriaTotalGB: number = 0;
   porcentajeMemoriaDisponible: number = 0;
 
-clienteSeleccionadoHardware: {
-  cliente: string;
-  cpu: string;
-  fabricante: string;
-  nombreSistema: string;
-  versionSistema: string;
-  familiaSistema: string;
-  idCpu: string;
-} | null = null;
-
+  clienteSeleccionadoHardware: {
+    cliente: string;
+    cpu: string;
+    fabricante: string;
+    nombreSistema: string;
+    versionSistema: string;
+    familiaSistema: string;
+    idCpu: string;
+  } | null = null;
 
   animarContenidoHardware: boolean = false;
 
-  constructor(private excelData: ExcelData) { }
+  archivosHardware: any[] = [];
+  mostrarDropdown = false;
+
+  mostrarAlerta = false;
+  tipoAlerta: 'success' | 'error' | 'warning' = 'success';
+  mensajeAlerta = '';
+
+  constructor(private archivoService: Archivo) {}
 
   ngOnInit(): void {
-    const columnasDeseadas = [
-      'Cliente',
-      'CPU',
-      'ID de la CPU', 
-      'Fabricante del sistema',
-      'Nombre del sistema',
-      'Versión del sistema',
-      'Familia del sistema',
-      'Fabricante del BIOS',
-      'Versión del BIOS',
-      'Memoria del sistema disponible',
-      'Memoria total disponible'
-    ];
+    this.obtenerArchivosHardware();
 
-    
-
-    const datos = this.excelData.getDatosPorTipo('hardware');
-    console.log('Datos hardware:', datos);
-
-    this.datosHardware = datos.map(dato => {
-      const fila: any = {};
-      columnasDeseadas.forEach(col => {
-        fila[col] = dato[col] ?? '';
-      });
-      return fila;
-    });
-
-    if (this.datosHardware.length > 0) {
-      this.seleccionarClienteHardware(this.datosHardware[0]);
+    const guardado = sessionStorage.getItem('archivo_hardware_seleccionado');
+    if (guardado) {
+      const { id, tipo } = JSON.parse(guardado);
+      if (tipo === 'hardware') {
+        this.cargarArchivoHardwarePorId(id);
+        return;
+      }
     }
+
+    this.mostrarNotificacion('warning', 'Debe seleccionar un archivo de tipo hardware desde la pestaña correspondiente.');
   }
 
-  
+  obtenerArchivosHardware(): void {
+    this.archivoService.listarPorTipo('hardware').subscribe({
+      next: (res) => {
+        this.archivosHardware = res;
+      },
+      error: () => this.mostrarNotificacion('error', 'No se pudo obtener la lista de archivos hardware.')
+    });
+  }
 
-  get letraAvatarHardware(): string {
-    return this.clienteSeleccionadoHardware?.cliente?.charAt(0)?.toUpperCase() || '-';
+  toggleDropdown(): void {
+    this.mostrarDropdown = !this.mostrarDropdown;
+  }
+
+  cambiarArchivo(archivo: any): void {
+    if (archivo.tipoArchivo !== 'hardware') {
+      this.mostrarNotificacion('warning', 'Solo se admiten archivos tipo Hardware.');
+      return;
+    }
+
+    sessionStorage.setItem('archivo_hardware_seleccionado', JSON.stringify({ id: archivo.id, tipo: archivo.tipoArchivo }));
+    this.mostrarDropdown = false;
+    this.cargarArchivoHardwarePorId(archivo.id);
+  }
+
+  cargarArchivoHardwarePorId(id: number): void {
+    this.archivoService.descargarArchivoPorId(id).subscribe({
+      next: async (blob) => {
+        const buffer = await blob.arrayBuffer();
+        const workbook = read(buffer, { type: 'array' });
+        const sheetName = workbook.SheetNames[0];
+        const datos = utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+        this.datosHardware = datos.map(fila => this.repararObjeto(fila));
+
+        if (this.datosHardware.length > 0) {
+          this.seleccionarClienteHardware(this.datosHardware[0]);
+        } else {
+          this.mostrarNotificacion('warning', 'El archivo de hardware está vacío o corrupto.');
+        }
+      },
+      error: () => {
+        this.mostrarNotificacion('error', 'No se pudo cargar el archivo de hardware.');
+      }
+    });
   }
 
   seleccionarClienteHardware(fila: any): void {
     this.clienteSeleccionadoHardware = {
-      cliente: fila['Cliente'],
-      cpu: fila['CPU'],
-      fabricante: fila['Fabricante del sistema'],
-      nombreSistema: fila['Nombre del sistema'],
-      versionSistema: fila['Versión del sistema'],
-      familiaSistema: fila['Familia del sistema'],
-      idCpu: fila['ID de la CPU']
-
+      cliente: fila['Cliente'] ?? '',
+      cpu: fila['CPU'] ?? '',
+      fabricante: fila['Fabricante del sistema'] ?? '',
+      nombreSistema: fila['Nombre del sistema'] ?? '',
+      versionSistema: fila['Versión del sistema'] ?? '',
+      familiaSistema: fila['Familia del sistema'] ?? '',
+      idCpu: fila['ID de la CPU'] ?? ''
     };
 
-    // Parseo de memoria
     this.memoriaDisponibleGB = this.convertirAMemoriaGB(fila['Memoria del sistema disponible']);
     this.memoriaTotalGB = this.convertirAMemoriaGB(fila['Memoria total disponible']);
-    if (this.memoriaTotalGB > 0) {
-      this.porcentajeMemoriaDisponible = Math.round((this.memoriaDisponibleGB / this.memoriaTotalGB) * 100);
-    } else {
-      this.porcentajeMemoriaDisponible = 0;
-    }
+    this.porcentajeMemoriaDisponible =
+      this.memoriaTotalGB > 0 ? Math.round((this.memoriaDisponibleGB / this.memoriaTotalGB) * 100) : 0;
 
     this.animarContenidoHardware = false;
     setTimeout(() => (this.animarContenidoHardware = true), 10);
@@ -108,14 +133,12 @@ clienteSeleccionadoHardware: {
     return 0;
   }
 
-  formatPorcentaje = (): string => {
-    return `${this.porcentajeMemoriaDisponible}%`;
-  };
+  formatPorcentaje = (): string => `${this.porcentajeMemoriaDisponible}%`;
 
   obtenerColorMemoria(): string {
-    if (this.porcentajeMemoriaDisponible > 70) return '#52c41a'; // verde
-    if (this.porcentajeMemoriaDisponible > 30) return '#faad14'; // naranja
-    return '#f5222d'; // rojo
+    if (this.porcentajeMemoriaDisponible > 70) return '#52c41a';
+    if (this.porcentajeMemoriaDisponible > 30) return '#faad14';
+    return '#f5222d';
   }
 
   obtenerLogoFabricante(fabricante: string | undefined): string {
@@ -129,7 +152,7 @@ clienteSeleccionadoHardware: {
     if (clave.includes('vmware')) return 'assets/images/logos-hardware/Vmware.png';
     if (clave === '' || clave === '---') return 'assets/images/logos-hardware/determinar.png';
 
-    return 'assets/images/logos-hardware/determinar.png'; // por defecto
+    return 'assets/images/logos-hardware/determinar.png';
   }
 
   obtenerLogoCPU(cpu: string | undefined): string {
@@ -141,7 +164,46 @@ clienteSeleccionadoHardware: {
     if (clave.includes('i9')) return 'assets/images/logos-cpu/core-i9.png';
     if (clave.includes('xeon')) return 'assets/images/logos-cpu/intel-xeon.png';
 
-    return 'assets/images/logos-cpu/images.png'; // imagen por defecto
+    return 'assets/images/logos-cpu/images.png';
   }
 
+  get letraAvatarHardware(): string {
+    return this.clienteSeleccionadoHardware?.cliente?.charAt(0)?.toUpperCase() || '-';
+  }
+
+  mostrarNotificacion(tipo: 'success' | 'error' | 'warning', mensaje: string) {
+    this.tipoAlerta = tipo;
+    this.mensajeAlerta = mensaje;
+    this.mostrarAlerta = true;
+  }
+
+  cerrarNotificacion() {
+    this.mostrarAlerta = false;
+  }
+
+  private repararTexto(valor: any): string {
+    if (!valor) return '';
+    return valor.toString()
+      .replace(/Ã¡/g, 'á')
+      .replace(/Ã©/g, 'é')
+      .replace(/Ã­/g, 'í')
+      .replace(/Ã³/g, 'ó')
+      .replace(/Ãº/g, 'ú')
+      .replace(/Ã±/g, 'ñ')
+      .replace(/Ã/g, 'Á')
+      .replace(/Ã‰/g, 'É')
+      .replace(/Ã/g, 'Í')
+      .replace(/Ã“/g, 'Ó')
+      .replace(/Ãš/g, 'Ú')
+      .replace(/Ã‘/g, 'Ñ')
+      .replace(/Ã/g, '');
+  }
+
+  private repararObjeto(obj: any): any {
+    const reparado: any = {};
+    for (const clave in obj) {
+      reparado[this.repararTexto(clave)] = this.repararTexto(obj[clave]);
+    }
+    return reparado;
+  }
 }

@@ -17,7 +17,6 @@ import { AlertaPersonalizada } from '../../components/alerta-personalizada/alert
   templateUrl: './lista-clientes.html',
   styleUrl: './lista-clientes.scss'
 })
-
 export class ListaClientes {
   datosOriginales: any[] = [];
   datosFiltrados: any[] = [];
@@ -34,9 +33,7 @@ export class ListaClientes {
   mostrarDropdown = false;
   animarCambioArchivo = false;
 
-  constructor(private route: ActivatedRoute,
-    private archivoService: Archivo
-  ) { }
+  constructor(private route: ActivatedRoute, private archivoService: Archivo) {}
 
   ngOnInit(): void {
     this.obtenerArchivosResumen();
@@ -44,32 +41,35 @@ export class ListaClientes {
     const idParam = this.route.snapshot.paramMap.get('id');
     const tipoParam = this.route.snapshot.paramMap.get('tipo');
 
-    if (idParam && tipoParam) {
+    if (idParam && tipoParam && tipoParam === 'resumen') {
       this.tipo = tipoParam;
       this.idArchivo = Number(idParam);
-      sessionStorage.setItem('archivoResumAct', JSON.stringify({ id: this.idArchivo, tipo: this.tipo }));
+      sessionStorage.setItem('archivo_resumen_seleccionado', JSON.stringify({ id: this.idArchivo, tipo: this.tipo }));
       this.cargarArchivoPorId(this.idArchivo);
     } else {
-      const guardado = sessionStorage.getItem('archivoResumAct');
+      const guardado = sessionStorage.getItem('archivo_resumen_seleccionado');
       if (guardado) {
         const { id, tipo } = JSON.parse(guardado);
-        this.idArchivo = id;
-        this.tipo = tipo;
-        this.cargarArchivoPorId(this.idArchivo);
+        if (tipo === 'resumen') {
+          this.idArchivo = id;
+          this.tipo = tipo;
+          this.cargarArchivoPorId(this.idArchivo);
+        } else {
+          this.mostrarNotificacion('warning', 'Solo se admiten archivos de tipo Resumen en este componente.');
+        }
       } else {
-        this.mostrarNotificacion('warning', 'Debe cargar un archivo desde la pestaña Carga de datos o hacer click en "Elegir archivo de cliente".');
+        this.mostrarNotificacion('warning', 'Debe cargar un archivo tipo resumen desde la pestaña correspondiente.');
       }
     }
   }
 
   get hayArchivoCargado(): boolean {
-    return !!sessionStorage.getItem('archivoResumAct');
+    return !!sessionStorage.getItem('archivo_resumen_seleccionado');
   }
 
   obtenerArchivosResumen() {
     this.archivoService.listarPorTipo('resumen').subscribe({
       next: (res) => {
-        console.log('📁 Archivos tipo resumen obtenidos:', res);
         this.archivosResumen = res;
       },
       error: () => this.mostrarNotificacion('error', 'No se pudo obtener la lista de archivos resumen.')
@@ -81,9 +81,14 @@ export class ListaClientes {
   }
 
   cambiarArchivo(archivo: any) {
+    if (archivo.tipoArchivo !== 'resumen') {
+      this.mostrarNotificacion('warning', 'Solo se admiten archivos tipo Resumen.');
+      return;
+    }
+
     this.idArchivo = archivo.id;
     this.tipo = archivo.tipoArchivo;
-    sessionStorage.setItem('archivoResumAct', JSON.stringify({ id: this.idArchivo, tipo: this.tipo }));
+    sessionStorage.setItem('archivo_resumen_seleccionado', JSON.stringify({ id: this.idArchivo, tipo: this.tipo }));
     this.mostrarDropdown = false;
     this.cargarArchivoPorId(this.idArchivo);
   }

@@ -205,18 +205,14 @@ export class CargaDatos implements OnInit {
     this.archivosPaginados = this.archivosGuardados.slice(inicio, fin);
   }
 
-verDashboard(archivo: any) {
-  sessionStorage.setItem('archivoResumAct', JSON.stringify({ id: archivo.id, tipo: archivo.tipoArchivo }));
-
-  const tipo = archivo.tipoArchivo;
-  const id = archivo.id;
-
-  if (tipo === 'resumen') {
-    this.router.navigate(['/dashboard/resumen', id]);
-  } else if (tipo === 'hardware') {
-    this.router.navigate(['/dashboard/hardware', id]);
-  } else if (tipo === 'software') {
-    this.router.navigate(['/dashboard/software', id]);
+  verDashboard(archivo: any) {
+    const tipo = archivo.tipoArchivo;
+    const id = archivo.id;
+  
+    const claveStorage = `archivo_${tipo}_seleccionado`;
+    sessionStorage.setItem(claveStorage, JSON.stringify({ id, tipo }));
+  
+    this.router.navigate([`/dashboard/${tipo}`, id]);
   }
-}
+  
 }

@@ -97,3 +97,7 @@
     </div>
   </div>
 </div>
+
+<app-alerta-personalizada [visible]="mostrarAlerta" [tipo]="tipoAlerta" [mensaje]="mensajeAlerta"
+    (aceptar)="cerrarNotificacion()" (cancelar)="cerrarNotificacion()">
+</app-alerta-personalizada>
