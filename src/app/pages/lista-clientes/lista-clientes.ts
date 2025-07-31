@@ -1,37 +1,46 @@
 import { Component } from '@angular/core';
-import { ExcelData } from '../../services/excel-data';
 import { CommonModule } from '@angular/common';
-import { NzAvatarModule } from 'ng-zorro-antd/avatar';
 import { FormsModule } from '@angular/forms';
+import { NzAvatarModule } from 'ng-zorro-antd/avatar';
 import { NzIconModule } from 'ng-zorro-antd/icon';
-import html2pdf from 'html2pdf.js';
-import { read, utils } from 'xlsx';
 import { ActivatedRoute } from '@angular/router';
+import { read, utils } from 'xlsx';
+import html2pdf from 'html2pdf.js';
+
 import { Archivo } from '../../services/archivo';
+import { AlertaPersonalizada } from '../../components/alerta-personalizada/alerta-personalizada';
 
 @Component({
   selector: 'app-lista-clientes',
-  imports: [CommonModule, NzAvatarModule, FormsModule, NzIconModule],
   standalone: true,
+  imports: [CommonModule, FormsModule, NzAvatarModule, NzIconModule, AlertaPersonalizada],
   templateUrl: './lista-clientes.html',
   styleUrl: './lista-clientes.scss'
 })
+
 export class ListaClientes {
   datosOriginales: any[] = [];
   datosFiltrados: any[] = [];
   textoBusqueda: string = '';
   clienteSeleccionado: any = null;
   animarContenido = false;
-
+  mostrarAlerta = false;
+  tipoAlerta: 'success' | 'error' | 'warning' = 'success';
+  mensajeAlerta = '';
   tipo: string = '';
   idArchivo: number = 0;
+  indiceClienteActual = 0;
+  archivosResumen: any[] = [];
+  mostrarDropdown = false;
+  animarCambioArchivo = false;
 
-  constructor(
-    private route: ActivatedRoute,
+  constructor(private route: ActivatedRoute,
     private archivoService: Archivo
   ) { }
 
   ngOnInit(): void {
+    this.obtenerArchivosResumen();
+
     const idParam = this.route.snapshot.paramMap.get('id');
     const tipoParam = this.route.snapshot.paramMap.get('tipo');
 
@@ -39,38 +48,80 @@ export class ListaClientes {
       this.tipo = tipoParam;
       this.idArchivo = Number(idParam);
       sessionStorage.setItem('archivoResumAct', JSON.stringify({ id: this.idArchivo, tipo: this.tipo }));
+      this.cargarArchivoPorId(this.idArchivo);
     } else {
       const guardado = sessionStorage.getItem('archivoResumAct');
       if (guardado) {
         const { id, tipo } = JSON.parse(guardado);
         this.idArchivo = id;
         this.tipo = tipo;
+        this.cargarArchivoPorId(this.idArchivo);
       } else {
-        console.warn('No hay archivo seleccionado');
-        return;
+        this.mostrarNotificacion('warning', 'Debe cargar un archivo desde la pestaña Carga de datos o hacer click en "Elegir archivo de cliente".');
       }
     }
+  }
 
-    this.archivoService.descargarArchivoPorId(this.idArchivo).subscribe({
+  get hayArchivoCargado(): boolean {
+    return !!sessionStorage.getItem('archivoResumAct');
+  }
+
+  obtenerArchivosResumen() {
+    this.archivoService.listarPorTipo('resumen').subscribe({
+      next: (res) => {
+        console.log('📁 Archivos tipo resumen obtenidos:', res);
+        this.archivosResumen = res;
+      },
+      error: () => this.mostrarNotificacion('error', 'No se pudo obtener la lista de archivos resumen.')
+    });
+  }
+
+  toggleDropdown() {
+    this.mostrarDropdown = !this.mostrarDropdown;
+  }
+
+  cambiarArchivo(archivo: any) {
+    this.idArchivo = archivo.id;
+    this.tipo = archivo.tipoArchivo;
+    sessionStorage.setItem('archivoResumAct', JSON.stringify({ id: this.idArchivo, tipo: this.tipo }));
+    this.mostrarDropdown = false;
+    this.cargarArchivoPorId(this.idArchivo);
+  }
+
+  cargarArchivoPorId(id: number) {
+    this.archivoService.descargarArchivoPorId(id).subscribe({
       next: async (blob) => {
         const buffer = await blob.arrayBuffer();
         const workbook = read(buffer, { type: 'array' });
         const sheetName = workbook.SheetNames[0];
         const datos = utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+        if (!datos || datos.length === 0) {
+          this.mostrarNotificacion('warning', 'El archivo seleccionado no contiene datos.');
+          return;
+        }
+
         this.procesarDatos(datos);
-        console.log(datos)
       },
       error: () => {
-        console.error('Error al cargar el archivo Excel.');
+        this.mostrarNotificacion('error', 'Ocurrió un error al descargar el archivo.');
       }
     });
   }
 
+  mostrarNotificacion(tipo: 'success' | 'error' | 'warning', mensaje: string) {
+    this.tipoAlerta = tipo;
+    this.mensajeAlerta = mensaje;
+    this.mostrarAlerta = true;
+  }
+
+  cerrarNotificacion() {
+    this.mostrarAlerta = false;
+  }
 
   procesarDatos(datos: any[]) {
     const reparado = datos.map(fila => {
       const limpio = this.repararObjeto(fila);
-
       return {
         cliente: limpio['Cliente'] ?? '',
         ipv4: limpio['Dirección IPv4'] ?? '',
@@ -102,27 +153,47 @@ export class ListaClientes {
   }
 
   obtenerValorSeguro(valor: any, textoPorDefecto: string = 'Desconocido'): string {
-  return valor && valor.toString().trim() !== '' ? valor : textoPorDefecto;
-}
+    return valor && valor.toString().trim() !== '' ? valor : textoPorDefecto;
+  }
 
   filtrarClientes() {
-    const texto = this.textoBusqueda.trim().toLowerCase();
-
-    if (!texto) {
-      this.datosFiltrados = [...this.datosOriginales];
-      this.clienteSeleccionado = this.datosFiltrados[0] || null;
+    if (!this.textoBusqueda.trim()) {
+      this.mostrarNotificacion('warning', 'Debe ingresar un nombre de cliente para buscar.');
       return;
     }
 
+    const texto = this.textoBusqueda.trim().toLowerCase();
     const terminos = texto.split(',').map(t => t.trim()).filter(t => t);
 
     this.datosFiltrados = this.datosOriginales.filter(cliente =>
       terminos.some(termino => cliente.cliente.toLowerCase().includes(termino))
     );
 
-    this.clienteSeleccionado = this.datosFiltrados[0] || null;
+    this.indiceClienteActual = 0;
+    this.seleccionarCliente(this.datosFiltrados[this.indiceClienteActual] || null);
   }
 
+  cambiarCliente(direccion: number) {
+    const nuevoIndice = this.indiceClienteActual + direccion;
+    if (nuevoIndice >= 0 && nuevoIndice < this.datosFiltrados.length) {
+      this.indiceClienteActual = nuevoIndice;
+      this.seleccionarCliente(this.datosFiltrados[nuevoIndice]);
+    }
+  }
+
+  onCambioTextoBusqueda() {
+    const texto = this.textoBusqueda.trim().toLowerCase();
+
+    if (texto === '') {
+      this.datosFiltrados = [...this.datosOriginales];
+      this.indiceClienteActual = 0;
+      if (this.datosFiltrados.length > 0) {
+        this.seleccionarCliente(this.datosFiltrados[0]);
+      } else {
+        this.clienteSeleccionado = null;
+      }
+    }
+  }
 
   get letraAvatar() {
     return this.clienteSeleccionado?.cliente?.charAt(0).toUpperCase() || '-';
@@ -143,7 +214,7 @@ export class ListaClientes {
     if (estado.includes('sin conexión con el servidor')) return '#ff4d4f';
     if (estado.includes('protegido')) return '#52c41a';
     if (estado.includes('riesgo')) return '#ff4d4f';
-    if (estado.includes('no autorizado')) return '#ffde4dff';
+    if (estado.includes('no autorizado')) return '#ffde4d';
     if (estado.includes('error') || estado.includes('sin conexión')) return '#ff4d4f';
     return '#d9d9d9';
   }
@@ -169,6 +240,7 @@ export class ListaClientes {
       .replace(/Ã‘/g, 'Ñ')
       .replace(/Ã/g, '');
   }
+
   private repararObjeto(obj: any): any {
     const reparado: any = {};
     for (const clave in obj) {

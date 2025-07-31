@@ -1,17 +1,39 @@
 <div class="contenedor-general">
     <div class="lado-izquierdo">
         <h2 class="subtitulo">Buscar Clientes:</h2>
-        <div class="busqueda">
-            <input type="text" class="input-busqueda" placeholder="Ingrese cliente" [(ngModel)]="textoBusqueda"
-                (keyup.enter)="filtrarClientes()" />
-            <button class="btn-buscar" (click)="filtrarClientes()">Buscar</button>
 
-            <div class="info-clientes">
+        <div class="contenedor-busqueda-dropdown">
+            <div class="busqueda">
+                <input type="text" class="input-busqueda" placeholder="Ingrese cliente" [(ngModel)]="textoBusqueda"
+                    (keyup.enter)="filtrarClientes()" (input)="onCambioTextoBusqueda()" />
+                <button class="btn-buscar" (click)="filtrarClientes()">Buscar</button>
                 <span class="contador-clientes">N° Clientes: {{ datosFiltrados.length }}</span>
-                <button class="btn-cambiar-archivo">Cambiar archivo resumen</button>
+            </div>
+
+            <div class="info-clientes" (clickOutside)="mostrarDropdown = false">
+                <div class="dropdown-container">
+                    <button class="btn-cambiar-archivo" (click)="toggleDropdown()">
+                        {{ hayArchivoCargado ? 'Cambiar archivo' : 'Elegir archivo de cliente' }}
+                        <nz-icon nzType="down" style="margin-left: 6px;"></nz-icon>
+                    </button>
+
+                    <div *ngIf="mostrarDropdown" class="dropdown-archivos">
+                        <div *ngIf="archivosResumen.length === 0" class="opcion-dropdown">
+                            No hay archivos resumen
+                        </div>
+                        <div *ngFor="let archivo of archivosResumen" class="opcion-dropdown"
+                            (click)="cambiarArchivo(archivo)">
+                            {{ archivo.nombreOriginal }}
+
+                            <nz-icon *ngIf="archivo.id === idArchivo" nzType="check"
+                                [ngStyle]="{ color: '#gb(59 59 59)', float: 'right' }">
+                            </nz-icon>
+                        </div>
+
+                    </div>
+                </div>
             </div>
         </div>
-
 
         <div class="card-clientes">
             <table class="tabla-clientes">
@@ -43,80 +65,109 @@
 
     <div class="lado-derecho" id="zona-imprimir">
         <div class="card-superior">
-            <div class="avatar-derecha-fondo" [class.aparecer]="animarContenido">
-                <nz-avatar [nzText]="letraAvatar" class="avatar-responsive"></nz-avatar>
-            </div>
-
-            <div class="grupo-izquierdo">
-                <div class="contenido-superior">
-                    <p>Cliente: <span>{{ obtenerValorSeguro(clienteSeleccionado?.cliente) }}</span></p>
-                    <p>Dirección IPv4: <span>{{ obtenerValorSeguro(clienteSeleccionado?.ipv4, 'Por asignar') }}</span>
-                    </p>
-                    <p>
-                        Estado de seguridad:
-                        <span>{{ obtenerValorSeguro(clienteSeleccionado?.estado, 'Por determinar') }}</span>
-                        <nz-icon *ngIf="clienteSeleccionado?.estado" [nzType]="iconoEstado"
-                            [ngStyle]="{ color: colorEstado, 'font-size': '20px', 'margin-left': '6px' }">
-                        </nz-icon>
-                    </p>
+            <ng-container *ngIf="datosFiltrados.length > 0; else sinCliente">
+                <div class="avatar-derecha-fondo" [class.aparecer]="animarContenido">
+                    <nz-avatar [nzText]="letraAvatar" class="avatar-responsive"></nz-avatar>
                 </div>
-            </div>
+
+                <div class="grupo-izquierdo">
+                    <div class="contenido-superior">
+                        <p>Cliente: <span>{{ obtenerValorSeguro(clienteSeleccionado?.cliente) }}</span></p>
+                        <p>Dirección IPv4: <span>{{ obtenerValorSeguro(clienteSeleccionado?.ipv4, 'Por asignar')
+                                }}</span></p>
+                        <p>
+                            Estado de seguridad:
+                            <span>{{ obtenerValorSeguro(clienteSeleccionado?.estado, 'Por determinar') }}</span>
+                            <nz-icon *ngIf="clienteSeleccionado?.estado" [nzType]="iconoEstado"
+                                [ngStyle]="{ color: colorEstado, 'font-size': '20px', 'margin-left': '6px' }">
+                            </nz-icon>
+                        </p>
+                    </div>
+                </div>
+            </ng-container>
+
+            <ng-template #sinCliente>
+                <div class="contenedor-sin-datos">
+                    <img src="assets/icons/risk-icon.png" alt="Advertencia" class="icono-warning" />
+                    <p class="mensaje-sin-datos">Debe realizar la carga de un archivo</p>
+                </div>
+            </ng-template>
         </div>
 
         <div class="card-inferior">
-            <h3 class="titulo-inferior">Detalles del Cliente</h3>
+            <ng-container *ngIf="datosFiltrados.length > 0; else sinDatos">
+                <h3 class="titulo-inferior navegable">
+                    <button (click)="cambiarCliente(-1)" [disabled]="indiceClienteActual === 0"
+                        class="flecha">&#x25C0;</button>
+                    Detalles del Cliente
+                    <button (click)="cambiarCliente(1)" [disabled]="indiceClienteActual === datosFiltrados.length - 1"
+                        class="flecha">&#x25B6;</button>
+                </h3>
 
-            <div class="grupo-dato">
-                <span class="etiqueta">Motor A:</span>
-                <span class="valor">{{ obtenerValorSeguro(clienteSeleccionado?.motorA) }}</span>
-            </div>
+                <div class="grupo-dato">
+                    <span class="etiqueta">Motor de análisis principal:</span>
+                    <span class="valor">{{ obtenerValorSeguro(clienteSeleccionado?.motorA) }}</span>
+                </div>
 
-            <div class="grupo-dato">
-                <span class="etiqueta">Motor B:</span>
-                <span class="valor">{{ obtenerValorSeguro(clienteSeleccionado?.motorB) }}</span>
-            </div>
+                <div class="grupo-dato">
+                    <span class="etiqueta">Motor de respaldo:</span>
+                    <span class="valor">{{ obtenerValorSeguro(clienteSeleccionado?.motorB) }}</span>
+                </div>
 
-            <div class="grupo-dato">
-                <span class="etiqueta">Versión de G DATA Security Client:</span>
-                <span class="valor">{{ obtenerValorSeguro(clienteSeleccionado?.version) }}</span>
-            </div>
+                <div class="grupo-dato">
+                    <span class="etiqueta">Versión del antivirus instalado:</span>
+                    <span class="valor">{{ obtenerValorSeguro(clienteSeleccionado?.version) }}</span>
+                </div>
 
-            <div class="grupo-dato">
-                <span class="etiqueta">Componentes de seguridad:</span>
-                <span class="valor">{{ obtenerValorSeguro(clienteSeleccionado?.componentes) }}</span>
-            </div>
+                <div class="grupo-dato">
+                    <span class="etiqueta">Componentes de seguridad:</span>
+                    <span class="valor">{{ obtenerValorSeguro(clienteSeleccionado?.componentes) }}</span>
+                </div>
 
-            <div class="grupo-dato">
-                <span class="etiqueta">Es necesario reiniciar:</span>
-                <span class="valor">{{ obtenerValorSeguro(clienteSeleccionado?.reiniciar) }}</span>
-            </div>
+                <div class="grupo-dato">
+                    <span class="etiqueta">¿Requiere reinicio del equipo?:</span>
+                    <span class="valor">{{ obtenerValorSeguro(clienteSeleccionado?.reiniciar) }}</span>
+                </div>
 
-            <div class="grupo-dato">
-                <span class="etiqueta">Última sincronización:</span>
-                <span class="valor">{{ obtenerValorSeguro(clienteSeleccionado?.ultimaSync) }}</span>
-            </div>
+                <div class="grupo-dato">
+                    <span class="etiqueta">Última actualización del antivirus:</span>
+                    <span class="valor">{{ obtenerValorSeguro(clienteSeleccionado?.ultimaSync) }}</span>
+                </div>
 
-            <div class="grupo-dato">
-                <span class="etiqueta">Actualizar base de datos de virus / fecha:</span>
-                <span class="valor">{{ obtenerValorSeguro(clienteSeleccionado?.actualizarVirus) }}</span>
-            </div>
+                <div class="grupo-dato">
+                    <span class="etiqueta">Base de datos de virus actualizada el:</span>
+                    <span class="valor">{{ obtenerValorSeguro(clienteSeleccionado?.actualizarVirus) }}</span>
+                </div>
 
-            <div class="grupo-dato">
-                <span class="etiqueta">Actualizar archivos de programa / fecha:</span>
-                <span class="valor">{{ obtenerValorSeguro(clienteSeleccionado?.actualizarProgramas) }}</span>
-            </div>
+                <div class="grupo-dato">
+                    <span class="etiqueta">Actualización del programa realizada el:</span>
+                    <span class="valor">{{ obtenerValorSeguro(clienteSeleccionado?.actualizarProgramas) }}</span>
+                </div>
 
-            <div class="grupo-dato">
-                <span class="etiqueta">Tipo:</span>
-                <span class="valor">{{ obtenerValorSeguro(clienteSeleccionado?.tipo) }}</span>
-            </div>
+                <div class="grupo-dato">
+                    <span class="etiqueta">Tipo de equipo / perfil de instalación:</span>
+                    <span class="valor">{{ obtenerValorSeguro(clienteSeleccionado?.tipo) }}</span>
+                </div>
 
-            <div class="contenedor-boton-pdf">
-                <button class="btn-pdf" (click)="imprimirPDF()">
-                    <nz-icon nzType="file-pdf" class="icono-pdf"></nz-icon>
-                    <span>Imprimir como PDF</span>
-                </button>
-            </div>
+                <div class="contenedor-boton-pdf">
+                    <button class="btn-pdf" (click)="imprimirPDF()">
+                        <nz-icon nzType="file-pdf" class="icono-pdf"></nz-icon>
+                        <span>Imprimir como PDF</span>
+                    </button>
+                </div>
+            </ng-container>
+
+            <ng-template #sinDatos>
+                <div class="contenedor-sin-datos">
+                    <img src="assets/icons/risk-icon.png" alt="Advertencia" class="icono-warning" />
+                    <p class="mensaje-sin-datos">Debe realizar la carga de un archivo</p>
+                </div>
+            </ng-template>
         </div>
+
     </div>
 </div>
+
+<app-alerta-personalizada [visible]="mostrarAlerta" [tipo]="tipoAlerta" [mensaje]="mensajeAlerta"
+    (aceptar)="cerrarNotificacion()" (cancelar)="cerrarNotificacion()">
+</app-alerta-personalizada>

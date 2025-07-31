@@ -20,23 +20,18 @@ export class CargaDatos implements OnInit {
   nombreArchivo = '';
   tipoArchivo: TipoArchivo | null = null;
   archivosGuardados: any[] = [];
-
   cargaExitosa = false;
   ocultarMensaje = false;
   cargandoArchivo = false;
-
   idUltimoAgregado: number | null = null;
   idArchivoEliminar: number | null = null;
-
   paginaActual = 1;
   tamanioPagina = 10;
   totalPaginas = 1;
   archivosPaginados: any[] = [];
-
   mostrarAlerta = false;
   tipoAlerta: 'success' | 'error' | 'warning' = 'success';
   mensajeAlerta = '';
-
   mostrarPregunta = false;
 
   constructor(

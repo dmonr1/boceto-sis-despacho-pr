@@ -1,14 +1,15 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpEvent, HttpHeaders, HttpRequest } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { TipoArchivo, ArchivoExcel } from '../interfaces/archivo-excel';
 import { ArchivoExcelResponse } from '../interfaces/archivo-excel-response';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class Archivo {
-  private apiUrl = 'http://localhost:8086/api/archivos';
+  private apiUrl = `${environment.apiBaseUrl}/archivos`;
 
   constructor(private http: HttpClient) {}
 
@@ -16,7 +17,6 @@ export class Archivo {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('tipo', tipo);
-  
     return this.http.post<ArchivoExcelResponse>(`${this.apiUrl}/subir`, formData);
   }
 
@@ -33,17 +33,14 @@ export class Archivo {
   }
 
   obtenerArchivosPorTipo(tipo: string): Observable<any[]> {
-    return this.http.get<any[]>(`http://localhost:8086/api/archivos/tipo/${tipo}`);
+    return this.http.get<any[]>(`${this.apiUrl}/tipo/${tipo}`);
   }
-  
+
   descargarArchivoPorId(id: number): Observable<Blob> {
-    return this.http.get(`http://localhost:8086/api/archivos/${id}/descargar`, {
-      responseType: 'blob'
-    });
+    return this.http.get(`${this.apiUrl}/${id}/descargar`, { responseType: 'blob' });
   }
-  
+
   listarTodos(): Observable<ArchivoExcel[]> {
-    return this.http.get<ArchivoExcel[]>(`${this.apiUrl}`);
+    return this.http.get<ArchivoExcel[]>(this.apiUrl);
   }
-  
 }
