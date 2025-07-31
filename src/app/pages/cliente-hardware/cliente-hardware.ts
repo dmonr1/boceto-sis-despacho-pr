@@ -25,11 +25,22 @@ export class ClienteHardware implements OnInit {
   clienteSeleccionadoHardware: {
     cliente: string;
     cpu: string;
-    fabricante: string;
+    idCpu: string;
+    velocidadCpu: string;
+    ram: string;
+  
+    fabricanteSistema: string;
     nombreSistema: string;
     versionSistema: string;
     familiaSistema: string;
-    idCpu: string;
+  
+    fabricanteBios: string;
+    fechaBios: string;
+    versionBios: string;
+  
+    fabricantePlaca: string;
+    placaBase: string;
+    versionPlaca: string;
   } | null = null;
 
   animarContenidoHardware: boolean = false;
@@ -89,9 +100,13 @@ export class ClienteHardware implements OnInit {
         const workbook = read(buffer, { type: 'array' });
         const sheetName = workbook.SheetNames[0];
         const datos = utils.sheet_to_json(workbook.Sheets[sheetName]);
-
+  
+        console.log('📄 Datos RAW del archivo Excel:', datos); // <-- ESTE LOG
+  
         this.datosHardware = datos.map(fila => this.repararObjeto(fila));
-
+  
+        console.log('🔧 Datos REPARADOS del archivo Excel:', this.datosHardware); // <-- OPCIONAL
+  
         if (this.datosHardware.length > 0) {
           this.seleccionarClienteHardware(this.datosHardware[0]);
         } else {
@@ -104,26 +119,43 @@ export class ClienteHardware implements OnInit {
     });
   }
 
+  convertirFechaExcel(fechaSerial: number): string {
+    const fechaBase = new Date(1899, 11, 30); // Excel inicia en 1900-01-01, pero hay un desfase
+    const fecha = new Date(fechaBase.getTime() + fechaSerial * 86400000);
+    return fecha.toISOString().split('T')[0]; // Devuelve "YYYY-MM-DD"
+  }
+
   seleccionarClienteHardware(fila: any): void {
     this.clienteSeleccionadoHardware = {
       cliente: fila['Cliente'] ?? '',
       cpu: fila['CPU'] ?? '',
-      fabricante: fila['Fabricante del sistema'] ?? '',
+      idCpu: fila['ID de la CPU'] ?? '',
+      velocidadCpu: fila['Velocidad de la CPU (MHz)'] ?? '',
+      ram: fila['RAM'] ?? '',
+  
+      fabricanteSistema: fila['Fabricante del sistema'] ?? '',
       nombreSistema: fila['Nombre del sistema'] ?? '',
       versionSistema: fila['Versión del sistema'] ?? '',
       familiaSistema: fila['Familia del sistema'] ?? '',
-      idCpu: fila['ID de la CPU'] ?? ''
+  
+      fabricanteBios: fila['Fabricante del BIOS'] ?? '',
+      fechaBios: fila['Fecha de publicación del BIOS'] ?? '',
+      versionBios: fila['Versión del BIOS'] ?? '',
+  
+      fabricantePlaca: fila['Fabricante de la placa base'] ?? '',
+      placaBase: fila['Placa base'] ?? '',
+      versionPlaca: fila['Versión de la placa base'] ?? ''
     };
-
+  
     this.memoriaDisponibleGB = this.convertirAMemoriaGB(fila['Memoria del sistema disponible']);
     this.memoriaTotalGB = this.convertirAMemoriaGB(fila['Memoria total disponible']);
     this.porcentajeMemoriaDisponible =
       this.memoriaTotalGB > 0 ? Math.round((this.memoriaDisponibleGB / this.memoriaTotalGB) * 100) : 0;
-
+  
     this.animarContenidoHardware = false;
     setTimeout(() => (this.animarContenidoHardware = true), 10);
   }
-
+  
   convertirAMemoriaGB(valor: string): number {
     if (!valor) return 0;
     valor = valor.replace(',', '.').trim().toUpperCase();
@@ -202,8 +234,19 @@ export class ClienteHardware implements OnInit {
   private repararObjeto(obj: any): any {
     const reparado: any = {};
     for (const clave in obj) {
-      reparado[this.repararTexto(clave)] = this.repararTexto(obj[clave]);
+      let valor = this.repararTexto(obj[clave]);
+  
+      if (clave.toLowerCase().includes('fecha')) {
+        const numero = Number(valor);
+        if (!isNaN(numero) && numero > 30000 && numero < 60000) {
+          valor = this.convertirFechaExcel(numero);
+        }
+      }
+  
+      reparado[this.repararTexto(clave)] = valor;
     }
     return reparado;
   }
+  
+
 }

@@ -1,32 +1,51 @@
 <div class="contenedor-hardware">
   <div class="contenedor-superior">
 
-    <!-- Card 1: Cliente -->
+    <!-- Card 1: Componentes internos -->
     <div class="card card-1 card-superior">
-      <h4 class="titulo-card"> Componentes internos</h4>
+      <h4 class="titulo-card">Componentes internos</h4>
       <div class="contenido-card">
-        <div class="avatar-derecha-fondo" [class.aparecer]="animarContenidoHardware">
-          <nz-avatar [nzText]="letraAvatarHardware" class="avatar-responsive"></nz-avatar>
+
+        <div class="logo-cpu">
+
+          <img [src]="obtenerLogoCPU(clienteSeleccionadoHardware?.cpu)" alt="Logo CPU" />
         </div>
         <div class="grupo-izquierdo">
           <div class="contenido-superior">
             <p>Cliente: <span>{{ clienteSeleccionadoHardware?.cliente || 'No reconocido' }}</span></p>
             <p>CPU: <span>{{ clienteSeleccionadoHardware?.cpu || 'Por asignar' }}</span></p>
-            <p>Fabricante: <span>{{ clienteSeleccionadoHardware?.fabricante || 'Desconocido' }}</span></p>
+            <p>ID de la CPU: <span>{{ clienteSeleccionadoHardware?.idCpu || '---' }}</span></p>
+            <p>Velocidad (MHz): <span>{{ clienteSeleccionadoHardware?.velocidadCpu || '---' }}</span></p>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Card 2: Fabricante -->
-    <div class="card card-2 card-fabricante" [class.aparecer]="animarContenidoHardware">
+    <!-- Card 2: Información del BIOS -->
+    <div class="card card-2 card-fabricante">
       <h4 class="titulo-card">Información del BIOS</h4>
       <div class="contenido-card">
-        <div class="logo-fabricante">
-          <img [src]="obtenerLogoFabricante(clienteSeleccionadoHardware?.fabricante)" alt="Logo fabricante" />
-        </div>
+
         <div class="detalles-fabricante">
-          <p><strong>Fabricante del sistema:</strong> {{ clienteSeleccionadoHardware?.fabricante || '---' }}</p>
+          <p><strong>Fabricante del BIOS:</strong> {{ clienteSeleccionadoHardware?.fabricanteBios || '---' }}</p>
+          <p><strong>Fecha de publicación:</strong> {{ clienteSeleccionadoHardware?.fechaBios || '---' }}</p>
+          <p><strong>Versión del BIOS:</strong> {{ clienteSeleccionadoHardware?.versionBios || '---' }}</p>
+          <p><strong>Fabricante placa base:</strong> {{ clienteSeleccionadoHardware?.fabricantePlaca || '---' }}</p>
+          <p><strong>Versión placa base:</strong> {{ clienteSeleccionadoHardware?.versionPlaca || '---' }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 3: Información del equipo -->
+    <div class="card card-3 card-cpu">
+      <h4 class="titulo-card">Información del equipo</h4>
+      <div class="contenido-card">
+        <div class="logo-fabricante">
+          <img [src]="obtenerLogoFabricante(clienteSeleccionadoHardware?.fabricanteSistema)" alt="Logo BIOS" />
+        </div>
+
+        <div class="detalles-cpu">
+          <p><strong>Fabricante del sistema:</strong> {{ clienteSeleccionadoHardware?.fabricanteSistema || '---' }}</p>
           <p><strong>Nombre del sistema:</strong> {{ clienteSeleccionadoHardware?.nombreSistema || '---' }}</p>
           <p><strong>Versión del sistema:</strong> {{ clienteSeleccionadoHardware?.versionSistema || '---' }}</p>
           <p><strong>Familia del sistema:</strong> {{ clienteSeleccionadoHardware?.familiaSistema || '---' }}</p>
@@ -34,36 +53,21 @@
       </div>
     </div>
 
-    <!-- Card 3: CPU -->
-    <div class="card card-3 card-cpu" [class.aparecer]="animarContenidoHardware">
-      <h4 class="titulo-card">Información del equipo</h4>
-      <div class="contenido-card">
-        <div class="logo-cpu">
-          <img [src]="obtenerLogoCPU(clienteSeleccionadoHardware?.cpu)" alt="Logo CPU" />
-        </div>
-        <div class="detalles-cpu">
-          <p><strong>CPU:</strong> {{ clienteSeleccionadoHardware?.cpu || '---' }}</p>
-          <p><strong>ID de la CPU:</strong> {{ clienteSeleccionadoHardware?.idCpu || '---' }}</p>
-          <p><strong>Velocidad de la CPU (MHz):</strong> {{ clienteSeleccionadoHardware?.idCpu || '---' }}</p>
-
-        </div>
-      </div>
-    </div>
-
   </div>
 
+  <!-- Parte inferior -->
   <div class="contenedor-inferior">
-    <!-- Tabla (sin título) -->
+
+    <!-- Tabla -->
     <div class="card-2 card-4">
       <table class="tabla-hardware">
         <thead>
           <tr>
             <th>Cliente</th>
             <th>CPU</th>
-            <th>Fabricante</th>
+            <th>Fabricante del sistema</th>
             <th>Nombre del sistema</th>
-            <th>Fabricante del BIOS</th>
-            <th>Versión del BIOS</th>
+            <th>Placa Base</th>
           </tr>
         </thead>
         <tbody>
@@ -72,32 +76,28 @@
             <td>{{ fila['CPU'] }}</td>
             <td>{{ fila['Fabricante del sistema'] }}</td>
             <td>{{ fila['Nombre del sistema'] }}</td>
-            <td>{{ fila['Fabricante del BIOS'] }}</td>
-            <td>{{ fila['Versión del BIOS'] }}</td>
+            <td>{{ fila['Placa base'] }}</td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <!-- Cards secundarias con título -->
+    <!-- Card 4: Especificaciones del sistema -->
     <div class="contenedor-doble-card">
-      <div class="card card-5-info">
-        <h4 class="titulo-card">Juntarlo con del de arriba</h4>
-        <p class="texto-superior"></p>
-      </div>
-
       <div class="card card-5 grafico-donut">
-        <h4 class="titulo-card">Especificaciones del sistema </h4>
+        <h4 class="titulo-card">Especificaciones del sistema</h4>
         <nz-progress [nzType]="'circle'" [nzPercent]="porcentajeMemoriaDisponible"
           [nzStrokeColor]="obtenerColorMemoria()" [nzFormat]="formatPorcentaje"></nz-progress>
         <p class="detalle-memoria">
           {{ memoriaDisponibleGB.toFixed(2) }} GB de {{ memoriaTotalGB.toFixed(2) }} GB
         </p>
+        <p><strong>RAM instalada:</strong> {{ clienteSeleccionadoHardware?.ram || '---' }}</p>
       </div>
     </div>
+
   </div>
 </div>
 
 <app-alerta-personalizada [visible]="mostrarAlerta" [tipo]="tipoAlerta" [mensaje]="mensajeAlerta"
-    (aceptar)="cerrarNotificacion()" (cancelar)="cerrarNotificacion()">
+  (aceptar)="cerrarNotificacion()" (cancelar)="cerrarNotificacion()">
 </app-alerta-personalizada>
