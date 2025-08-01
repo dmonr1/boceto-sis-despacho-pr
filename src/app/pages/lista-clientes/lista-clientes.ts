@@ -17,6 +17,7 @@ import { AlertaPersonalizada } from '../../components/alerta-personalizada/alert
   templateUrl: './lista-clientes.html',
   styleUrl: './lista-clientes.scss'
 })
+
 export class ListaClientes {
   datosOriginales: any[] = [];
   datosFiltrados: any[] = [];
@@ -33,7 +34,8 @@ export class ListaClientes {
   mostrarDropdown = false;
   animarCambioArchivo = false;
 
-  constructor(private route: ActivatedRoute, private archivoService: Archivo) {}
+  constructor(private route: ActivatedRoute, 
+    private archivoService: Archivo) { }
 
   ngOnInit(): void {
     this.obtenerArchivosResumen();
@@ -102,7 +104,7 @@ export class ListaClientes {
         const datos = utils.sheet_to_json(workbook.Sheets[sheetName]);
 
         console.log(datos);
-        
+
 
         if (!datos || datos.length === 0) {
           this.mostrarNotificacion('warning', 'El archivo seleccionado no contiene datos.');
@@ -116,12 +118,32 @@ export class ListaClientes {
       }
     });
   }
+
   private convertirFechaExcel(valor: any): string {
-    if (typeof valor === 'number') {
-      const fecha = new Date(Math.round((valor - 25569) * 86400 * 1000));
-      return fecha.toLocaleString(); // o `.toLocaleDateString()` si quieres solo fecha
+    if (!isNaN(valor) && typeof valor === 'number') {
+      const fecha = new Date((valor - 25569) * 86400 * 1000);
+      const dia = fecha.getDate().toString().padStart(2, '0');
+      const mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
+      const anio = fecha.getFullYear();
+      const horas = fecha.getHours().toString().padStart(2, '0');
+      const minutos = fecha.getMinutes().toString().padStart(2, '0');
+      const segundos = fecha.getSeconds().toString().padStart(2, '0');
+      return `${dia}/${mes}/${anio} ${horas}:${minutos}:${segundos}`;
     }
-    return valor;
+
+    if (!isNaN(parseFloat(valor))) {
+      const numero = parseFloat(valor);
+      const fecha = new Date((numero - 25569) * 86400 * 1000);
+      const dia = fecha.getDate().toString().padStart(2, '0');
+      const mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
+      const anio = fecha.getFullYear();
+      const horas = fecha.getHours().toString().padStart(2, '0');
+      const minutos = fecha.getMinutes().toString().padStart(2, '0');
+      const segundos = fecha.getSeconds().toString().padStart(2, '0');
+      return `${dia}/${mes}/${anio} ${horas}:${minutos}:${segundos}`;
+    }
+
+    return valor && valor.toString().trim() !== '' ? valor.toString() : 'Desconocido';
   }
 
   mostrarNotificacion(tipo: 'success' | 'error' | 'warning', mensaje: string) {

@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { TipoArchivo, ArchivoExcel } from '../interfaces/archivo-excel';
 import { ArchivoExcelResponse } from '../interfaces/archivo-excel-response';
 import { environment } from '../../environments/environment';
+import { ClienteSoftwareDTO } from '../interfaces/cliente-software-dto';
 
 @Injectable({
   providedIn: 'root'
@@ -42,5 +43,11 @@ export class Archivo {
 
   listarTodos(): Observable<ArchivoExcel[]> {
     return this.http.get<ArchivoExcel[]>(this.apiUrl);
+  }
+
+  obtenerDatosSoftware(id: number, cliente: string) {
+    return this.http.get<ClienteSoftwareDTO[]>(`${this.apiUrl}/${id}/software-datos`, {
+      params: { cliente }
+    });
   }
 }

@@ -3,6 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { ListaClientes } from '../../pages/lista-clientes/lista-clientes';
 import { ClienteHardware } from '../../pages/cliente-hardware/cliente-hardware';
 import { CommonModule } from '@angular/common';
+import { ClienteSoftware } from '../../pages/cliente-software/cliente-software';
 
 @Component({
   selector: 'app-dashboard-router',
@@ -14,14 +15,15 @@ import { CommonModule } from '@angular/common';
       <app-cliente-hardware />
     </ng-container>
     <ng-container *ngIf="tipo === 'software'">
-      <!-- Reemplaza esto si tienes otro componente -->
-      <p>Componente para software no implementado aún</p>
+    <app-cliente-software />
     </ng-container>
   `,
   standalone: true,
   imports: [
     ListaClientes,
-    ClienteHardware, CommonModule
+    ClienteHardware,
+    ClienteSoftware,
+    CommonModule
   ]
 })
 export class DashboardRouter {

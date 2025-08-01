@@ -1,1 +1,46 @@
-<p>cliente-software works!</p>
+<div class="contenedor-software">
+    <div class="lado-izquierdo">
+      <h2 class="subtitulo">Búsqueda por Cliente</h2>
+  
+      <div class="barra-busqueda">
+        <input [(ngModel)]="textoBusqueda" placeholder="Nombre del cliente" />
+        <button (click)="buscarCliente()">Buscar</button>
+        <span class="contador">N° Registros: {{ datosFiltrados.length }}</span>
+      </div>
+  
+      <div class="card-tabla">
+        <table *ngIf="datosFiltrados.length > 0">
+          <thead>
+            <tr>
+              <th>Cliente</th>
+              <th>Instalado</th>
+              <th>Nombre</th>
+              <th>Fecha de instalación</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let fila of datosFiltrados">
+              <td>{{ obtenerValorSeguro(fila.cliente) }}</td>
+              <td>{{ obtenerValorSeguro(fila.instalado) }}</td>
+              <td>{{ obtenerValorSeguro(fila.nombre) }}</td>
+              <td>{{ obtenerValorSeguro(fila.fecha) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  
+    <div class="lado-derecho">
+      <!-- Espacio reservado para el diseño futuro -->
+    </div>
+  
+    <!-- ALERTA -->
+    <app-alerta-personalizada
+      [visible]="mostrarAlerta"
+      [tipo]="tipoAlerta"
+      [mensaje]="mensajeAlerta"
+      (aceptar)="cerrarNotificacion()"
+      (cancelar)="cerrarNotificacion()"
+    ></app-alerta-personalizada>
+  </div>
+  
