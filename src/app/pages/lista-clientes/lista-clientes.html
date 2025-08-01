@@ -53,10 +53,22 @@
                     </tr>
                     <tr *ngFor="let fila of datosFiltrados" (click)="seleccionarCliente(fila)"
                         [class.selected]="clienteSeleccionado?.cliente === fila.cliente" style="cursor: pointer;">
-                        <td>{{ obtenerValorSeguro(fila.cliente) }}</td>
-                        <td>{{ obtenerValorSeguro(fila.ipv4) }}</td>
-                        <td>{{ obtenerValorSeguro(fila.estado) }}</td>
-                        <td>{{ obtenerValorSeguro(fila.version) }}</td>
+                        <td
+                            [ngClass]="{'resaltado-desconocido-tabla': obtenerValorSeguro(fila.cliente) === 'Desconocido'}">
+                            {{ obtenerValorSeguro(fila.cliente) }}
+                        </td>
+                        <td
+                            [ngClass]="{'resaltado-desconocido-tabla': obtenerValorSeguro(fila.ipv4) === 'Desconocido'}">
+                            {{ obtenerValorSeguro(fila.ipv4) }}
+                        </td>
+                        <td
+                            [ngClass]="{'resaltado-desconocido-tabla': obtenerValorSeguro(fila.estado) === 'Desconocido'}">
+                            {{ obtenerValorSeguro(fila.estado) }}
+                        </td>
+                        <td
+                            [ngClass]="{'resaltado-desconocido-tabla': obtenerValorSeguro(fila.version) === 'Desconocido'}">
+                            {{ obtenerValorSeguro(fila.version) }}
+                        </td>
                     </tr>
                 </tbody>
             </table>
@@ -106,47 +118,74 @@
 
                 <div class="grupo-dato">
                     <span class="etiqueta">Motor de análisis principal:</span>
-                    <span class="valor">{{ obtenerValorSeguro(clienteSeleccionado?.motorA) }}</span>
+                    <span class="valor"
+                        [ngClass]="{ 'resaltado-desconocido': obtenerValorSeguro(clienteSeleccionado?.motorA) === 'Desconocido' }">
+                        {{ obtenerValorSeguro(clienteSeleccionado?.motorA) }}
+                    </span>
                 </div>
 
                 <div class="grupo-dato">
                     <span class="etiqueta">Motor de respaldo:</span>
-                    <span class="valor">{{ obtenerValorSeguro(clienteSeleccionado?.motorB) }}</span>
+                    <span class="valor"
+                        [ngClass]="{ 'resaltado-desconocido': obtenerValorSeguro(clienteSeleccionado?.motorB) === 'Desconocido' }">
+                        {{ obtenerValorSeguro(clienteSeleccionado?.motorB) }}
+                    </span>
                 </div>
 
                 <div class="grupo-dato">
                     <span class="etiqueta">Versión del antivirus instalado:</span>
-                    <span class="valor">{{ obtenerValorSeguro(clienteSeleccionado?.version) }}</span>
+                    <span class="valor"
+                        [ngClass]="{ 'resaltado-desconocido': obtenerValorSeguro(clienteSeleccionado?.version) === 'Desconocido' }">
+                        {{ obtenerValorSeguro(clienteSeleccionado?.version) }}
+                    </span>
                 </div>
 
                 <div class="grupo-dato">
                     <span class="etiqueta">Componentes de seguridad:</span>
-                    <span class="valor">{{ obtenerValorSeguro(clienteSeleccionado?.componentes) }}</span>
+                    <span class="valor"
+                        [ngClass]="{ 'resaltado-desconocido': obtenerValorSeguro(clienteSeleccionado?.componentes) === 'Desconocido' }">
+                        {{ obtenerValorSeguro(clienteSeleccionado?.componentes) }}
+                    </span>
                 </div>
 
                 <div class="grupo-dato">
                     <span class="etiqueta">¿Requiere reinicio del equipo?:</span>
-                    <span class="valor">{{ obtenerValorSeguro(clienteSeleccionado?.reiniciar) }}</span>
+                    <span class="valor"
+                        [ngClass]="{ 'resaltado-desconocido': obtenerValorSeguro(clienteSeleccionado?.reiniciar) === 'Desconocido' }">
+                        {{ obtenerValorSeguro(clienteSeleccionado?.reiniciar) }}
+                    </span>
                 </div>
 
                 <div class="grupo-dato">
                     <span class="etiqueta">Última actualización del antivirus:</span>
-                    <span class="valor">{{ obtenerValorSeguro(clienteSeleccionado?.ultimaSync) }}</span>
+                    <span class="valor"
+                        [ngClass]="{ 'resaltado-desconocido': obtenerValorSeguro(clienteSeleccionado?.ultimaSync) === 'Desconocido' }">
+                        {{ obtenerValorSeguro(clienteSeleccionado?.ultimaSync) }}
+                    </span>
                 </div>
 
                 <div class="grupo-dato">
                     <span class="etiqueta">Base de datos de virus actualizada el:</span>
-                    <span class="valor">{{ obtenerValorSeguro(clienteSeleccionado?.actualizarVirus) }}</span>
+                    <span class="valor"
+                        [ngClass]="{ 'resaltado-desconocido': obtenerValorSeguro(clienteSeleccionado?.actualizarVirus) === 'Desconocido' }">
+                        {{ obtenerValorSeguro(clienteSeleccionado?.actualizarVirus) }}
+                    </span>
                 </div>
 
                 <div class="grupo-dato">
                     <span class="etiqueta">Actualización del programa realizada el:</span>
-                    <span class="valor">{{ obtenerValorSeguro(clienteSeleccionado?.actualizarProgramas) }}</span>
+                    <span class="valor"
+                        [ngClass]="{ 'resaltado-desconocido': obtenerValorSeguro(clienteSeleccionado?.actualizarProgramas) === 'Desconocido' }">
+                        {{ obtenerValorSeguro(clienteSeleccionado?.actualizarProgramas) }}
+                    </span>
                 </div>
 
                 <div class="grupo-dato">
                     <span class="etiqueta">Tipo de equipo / perfil de instalación:</span>
-                    <span class="valor">{{ obtenerValorSeguro(clienteSeleccionado?.tipo) }}</span>
+                    <span class="valor"
+                        [ngClass]="{ 'resaltado-desconocido': obtenerValorSeguro(clienteSeleccionado?.tipo) === 'Desconocido' }">
+                        {{ obtenerValorSeguro(clienteSeleccionado?.tipo) }}
+                    </span>
                 </div>
 
                 <div class="contenedor-boton-pdf">

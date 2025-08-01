@@ -101,6 +101,9 @@ export class ListaClientes {
         const sheetName = workbook.SheetNames[0];
         const datos = utils.sheet_to_json(workbook.Sheets[sheetName]);
 
+        console.log(datos);
+        
+
         if (!datos || datos.length === 0) {
           this.mostrarNotificacion('warning', 'El archivo seleccionado no contiene datos.');
           return;
@@ -112,6 +115,13 @@ export class ListaClientes {
         this.mostrarNotificacion('error', 'Ocurrió un error al descargar el archivo.');
       }
     });
+  }
+  private convertirFechaExcel(valor: any): string {
+    if (typeof valor === 'number') {
+      const fecha = new Date(Math.round((valor - 25569) * 86400 * 1000));
+      return fecha.toLocaleString(); // o `.toLocaleDateString()` si quieres solo fecha
+    }
+    return valor;
   }
 
   mostrarNotificacion(tipo: 'success' | 'error' | 'warning', mensaje: string) {
@@ -134,11 +144,11 @@ export class ListaClientes {
         motorA: limpio['Motor A'] ?? '',
         motorB: limpio['Motor B'] ?? '',
         version: limpio['Versión de G DATA Security Client'] ?? '',
-        componentes: limpio['Componentes de seguridad'] ?? '',
+        componentes: this.convertirFechaExcel(limpio['Componentes de seguridad']) ?? '',
         reiniciar: limpio['Es necesario reiniciar'] ?? '',
-        ultimaSync: limpio['Última sincronización'] ?? '',
-        actualizarVirus: limpio['Actualizar base de datos de virus / fecha'] ?? '',
-        actualizarProgramas: limpio['Actualizar archivos de programa / fecha'] ?? '',
+        ultimaSync: this.convertirFechaExcel(limpio['Última sincronización']) ?? '',
+        actualizarVirus: this.convertirFechaExcel(limpio['Actualizar base de datos de virus / fecha']) ?? '',
+        actualizarProgramas: this.convertirFechaExcel(limpio['Actualizar archivos de programa / fecha']) ?? '',
         tipo: limpio['Tipo'] ?? ''
       };
     });

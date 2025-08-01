@@ -1,97 +1,242 @@
 <div class="contenedor-hardware">
   <div class="contenedor-superior">
 
-    <!-- Card 1: Componentes internos -->
     <div class="card card-1 card-superior">
-      <h4 class="titulo-card">Componentes internos</h4>
-      <div class="contenido-card">
-
-        <div class="logo-cpu">
-
-          <img [src]="obtenerLogoCPU(clienteSeleccionadoHardware?.cpu)" alt="Logo CPU" />
+      <ng-container *ngIf="!cargandoArchivo && clienteSeleccionadoHardware; else sinDatosCard1">
+        <h4 class="titulo-card">Componentes internos</h4>
+        <div class="contenido-card">
+          <div class="logo-cpu">
+            <img [src]="obtenerLogoCPU(clienteSeleccionadoHardware.cpu)" alt="Logo CPU" />
+          </div>
+          <div class="grupo-izquierdo">
+            <div class="contenido-superior">
+              <p>Cliente:
+                <span [ngClass]="{'resaltado-desconocido': clienteSeleccionadoHardware.cliente === 'Desconocido'}">
+                  {{ clienteSeleccionadoHardware.cliente }}
+                </span>
+              </p>
+              <p>CPU:
+                <span [ngClass]="{'resaltado-desconocido': clienteSeleccionadoHardware.cpu === 'Desconocido'}">
+                  {{ clienteSeleccionadoHardware.cpu }}
+                </span>
+              </p>
+              <p>ID de la CPU:
+                <span [ngClass]="{'resaltado-desconocido': clienteSeleccionadoHardware.idCpu === 'Desconocido'}">
+                  {{ clienteSeleccionadoHardware.idCpu }}
+                </span>
+              </p>
+              <p>Velocidad (MHz):
+                <span [ngClass]="{'resaltado-desconocido': clienteSeleccionadoHardware.velocidadCpu === 'Desconocido'}">
+                  {{ clienteSeleccionadoHardware.velocidadCpu }}
+                </span>
+              </p>
+            </div>
+          </div>
         </div>
-        <div class="grupo-izquierdo">
-          <div class="contenido-superior">
-            <p>Cliente: <span>{{ clienteSeleccionadoHardware?.cliente || 'No reconocido' }}</span></p>
-            <p>CPU: <span>{{ clienteSeleccionadoHardware?.cpu || 'Por asignar' }}</span></p>
-            <p>ID de la CPU: <span>{{ clienteSeleccionadoHardware?.idCpu || '---' }}</span></p>
-            <p>Velocidad (MHz): <span>{{ clienteSeleccionadoHardware?.velocidadCpu || '---' }}</span></p>
+      </ng-container>
+      <ng-template #sinDatosCard1>
+        <div *ngIf="!cargandoArchivo" class="estado-vacio-card">
+          <img src="assets/icons/risk-icon.png" alt="Sin datos" />
+          <p>Debe realizar la carga de un archivo</p>
+        </div>
+      </ng-template>
+    </div>
+
+    <div class="card card-2 card-fabricante">
+      <ng-container *ngIf="!cargandoArchivo && clienteSeleccionadoHardware; else sinDatosCard2">
+        <h4 class="titulo-card">Información del BIOS</h4>
+        <div class="contenido-card">
+          <div class="detalles-fabricante">
+            <p><strong>Fabricante del BIOS:</strong>
+              <span [ngClass]="{'resaltado-desconocido': clienteSeleccionadoHardware.fabricanteBios === 'Desconocido'}">
+                {{ clienteSeleccionadoHardware.fabricanteBios }}
+              </span>
+            </p>
+            <p><strong>Fecha de publicación:</strong>
+              <span [ngClass]="{'resaltado-desconocido': clienteSeleccionadoHardware.fechaBios === 'Desconocido'}">
+                {{ clienteSeleccionadoHardware.fechaBios }}
+              </span>
+            </p>
+            <p><strong>Versión del BIOS:</strong>
+              <span [ngClass]="{'resaltado-desconocido': clienteSeleccionadoHardware.versionBios === 'Desconocido'}">
+                {{ clienteSeleccionadoHardware.versionBios }}
+              </span>
+            </p>
+            <p><strong>Fabricante placa base:</strong>
+              <span
+                [ngClass]="{'resaltado-desconocido': clienteSeleccionadoHardware.fabricantePlaca === 'Desconocido'}">
+                {{ clienteSeleccionadoHardware.fabricantePlaca }}
+              </span>
+            </p>
+            <p><strong>Versión placa base:</strong>
+              <span [ngClass]="{'resaltado-desconocido': clienteSeleccionadoHardware.versionPlaca === 'Desconocido'}">
+                {{ clienteSeleccionadoHardware.versionPlaca }}
+              </span>
+            </p>
+          </div>
+        </div>
+      </ng-container>
+      <ng-template #sinDatosCard2>
+        <div *ngIf="!cargandoArchivo" class="estado-vacio-card">
+          <img src="assets/icons/risk-icon.png" alt="Sin datos" />
+          <p>Debe realizar la carga de un archivo</p>
+        </div>
+      </ng-template>
+    </div>
+
+    <div class="card card-3 card-cpu">
+      <ng-container *ngIf="!cargandoArchivo && clienteSeleccionadoHardware; else sinDatosCard3">
+        <h4 class="titulo-card">Información del equipo</h4>
+        <div class="contenido-card">
+          <div class="logo-fabricante">
+            <img [src]="obtenerLogoFabricante(clienteSeleccionadoHardware.fabricanteSistema)" alt="Logo BIOS" />
+          </div>
+          <div class="detalles-cpu">
+            <p><strong>Fabricante del sistema:</strong>
+              <span
+                [ngClass]="{'resaltado-desconocido': clienteSeleccionadoHardware.fabricanteSistema === 'Desconocido'}">
+                {{ clienteSeleccionadoHardware.fabricanteSistema }}
+              </span>
+            </p>
+            <p><strong>Nombre del sistema:</strong>
+              <span [ngClass]="{'resaltado-desconocido': clienteSeleccionadoHardware.nombreSistema === 'Desconocido'}">
+                {{ clienteSeleccionadoHardware.nombreSistema }}
+              </span>
+            </p>
+            <p><strong>Versión del sistema:</strong>
+              <span [ngClass]="{'resaltado-desconocido': clienteSeleccionadoHardware.versionSistema === 'Desconocido'}">
+                {{ clienteSeleccionadoHardware.versionSistema }}
+              </span>
+            </p>
+            <p><strong>Familia del sistema:</strong>
+              <span [ngClass]="{'resaltado-desconocido': clienteSeleccionadoHardware.familiaSistema === 'Desconocido'}">
+                {{ clienteSeleccionadoHardware.familiaSistema }}
+              </span>
+            </p>
+          </div>
+        </div>
+      </ng-container>
+      <ng-template #sinDatosCard3>
+        <div *ngIf="!cargandoArchivo" class="estado-vacio-card">
+          <img src="assets/icons/risk-icon.png" alt="Sin datos" />
+          <p>Debe realizar la carga de un archivo</p>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+
+  <div class="contenedor-inferior">
+    <div class="contenedor-tabla">
+      <div class="barra-herramientas">
+        <input type="text" [(ngModel)]="filtroCliente" (input)="filtrarAlEscribir()" (keydown.enter)="validarBusqueda()"
+          placeholder="Buscar cliente..." class="input-busqueda" />
+
+        <button class="btn-buscar" (click)="validarBusqueda()">Buscar</button>
+        <span class="contador-clientes">Mostrando {{ clientesFiltrados.length }} clientes</span>
+
+        <div class="info-clientes" (clickOutside)="mostrarDropdown = false">
+          <div class="dropdown-container">
+            <button class="btn-cambiar-archivo" (click)="toggleDropdown()">
+              {{ hayArchivoCargado ? 'Cambiar archivo' : 'Elegir archivo' }}
+              <nz-icon nzType="down" style="margin-left: 6px;"></nz-icon>
+            </button>
+
+            <div *ngIf="mostrarDropdown" class="dropdown-archivos">
+              <div *ngIf="archivosHardware.length === 0" class="opcion-dropdown">
+                No hay archivos hardware
+              </div>
+              <div *ngFor="let archivo of archivosHardware" class="opcion-dropdown" (click)="cambiarArchivo(archivo)">
+                {{ archivo.nombreOriginal }}
+                <nz-icon *ngIf="archivo.id === idArchivo" nzType="check"
+                  [ngStyle]="{ color: '#3b3b3b', float: 'right' }"></nz-icon>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Card 2: Información del BIOS -->
-    <div class="card card-2 card-fabricante">
-      <h4 class="titulo-card">Información del BIOS</h4>
-      <div class="contenido-card">
-
-        <div class="detalles-fabricante">
-          <p><strong>Fabricante del BIOS:</strong> {{ clienteSeleccionadoHardware?.fabricanteBios || '---' }}</p>
-          <p><strong>Fecha de publicación:</strong> {{ clienteSeleccionadoHardware?.fechaBios || '---' }}</p>
-          <p><strong>Versión del BIOS:</strong> {{ clienteSeleccionadoHardware?.versionBios || '---' }}</p>
-          <p><strong>Fabricante placa base:</strong> {{ clienteSeleccionadoHardware?.fabricantePlaca || '---' }}</p>
-          <p><strong>Versión placa base:</strong> {{ clienteSeleccionadoHardware?.versionPlaca || '---' }}</p>
-        </div>
+      <div class="card">
+        <table class="tabla-hardware">
+          <thead>
+            <tr>
+              <th>Cliente</th>
+              <th>CPU</th>
+              <th>Fabricante del sistema</th>
+              <th>Nombre del sistema</th>
+              <th>Placa Base</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngIf="clientesFiltrados.length === 0" class="vacio">
+              <td colspan="5">Por favor ingresar un archivo para visualizar clientes.</td>
+            </tr>
+            <tr *ngFor="let fila of clientesFiltrados" (click)="seleccionarClienteHardware(fila)">
+              <td [ngClass]="{'resaltado-desconocido-tabla': obtenerValorSeguro(fila['Cliente']) === 'Desconocido'}">
+                {{ obtenerValorSeguro(fila['Cliente']) }}
+              </td>
+              <td [ngClass]="{'resaltado-desconocido-tabla': obtenerValorSeguro(fila['CPU']) === 'Desconocido'}">
+                {{ obtenerValorSeguro(fila['CPU']) }}
+              </td>
+              <td
+                [ngClass]="{'resaltado-desconocido-tabla': obtenerValorSeguro(fila['Fabricante del sistema']) === 'Desconocido'}">
+                {{ obtenerValorSeguro(fila['Fabricante del sistema']) }}
+              </td>
+              <td
+                [ngClass]="{'resaltado-desconocido-tabla': obtenerValorSeguro(fila['Nombre del sistema']) === 'Desconocido'}">
+                {{ obtenerValorSeguro(fila['Nombre del sistema']) }}
+              </td>
+              <td [ngClass]="{'resaltado-desconocido-tabla': obtenerValorSeguro(fila['Placa base']) === 'Desconocido'}">
+                {{ obtenerValorSeguro(fila['Placa base']) }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
+
     </div>
 
-    <!-- Card 3: Información del equipo -->
-    <div class="card card-3 card-cpu">
-      <h4 class="titulo-card">Información del equipo</h4>
-      <div class="contenido-card">
-        <div class="logo-fabricante">
-          <img [src]="obtenerLogoFabricante(clienteSeleccionadoHardware?.fabricanteSistema)" alt="Logo BIOS" />
-        </div>
-
-        <div class="detalles-cpu">
-          <p><strong>Fabricante del sistema:</strong> {{ clienteSeleccionadoHardware?.fabricanteSistema || '---' }}</p>
-          <p><strong>Nombre del sistema:</strong> {{ clienteSeleccionadoHardware?.nombreSistema || '---' }}</p>
-          <p><strong>Versión del sistema:</strong> {{ clienteSeleccionadoHardware?.versionSistema || '---' }}</p>
-          <p><strong>Familia del sistema:</strong> {{ clienteSeleccionadoHardware?.familiaSistema || '---' }}</p>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- Parte inferior -->
-  <div class="contenedor-inferior">
-
-    <!-- Tabla -->
-    <div class="card-2 card-4">
-      <table class="tabla-hardware">
-        <thead>
-          <tr>
-            <th>Cliente</th>
-            <th>CPU</th>
-            <th>Fabricante del sistema</th>
-            <th>Nombre del sistema</th>
-            <th>Placa Base</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let fila of datosHardware" (click)="seleccionarClienteHardware(fila)">
-            <td>{{ fila['Cliente'] }}</td>
-            <td>{{ fila['CPU'] }}</td>
-            <td>{{ fila['Fabricante del sistema'] }}</td>
-            <td>{{ fila['Nombre del sistema'] }}</td>
-            <td>{{ fila['Placa base'] }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Card 4: Especificaciones del sistema -->
     <div class="contenedor-doble-card">
       <div class="card card-5 grafico-donut">
-        <h4 class="titulo-card">Especificaciones del sistema</h4>
-        <nz-progress [nzType]="'circle'" [nzPercent]="porcentajeMemoriaDisponible"
-          [nzStrokeColor]="obtenerColorMemoria()" [nzFormat]="formatPorcentaje"></nz-progress>
-        <p class="detalle-memoria">
-          {{ memoriaDisponibleGB.toFixed(2) }} GB de {{ memoriaTotalGB.toFixed(2) }} GB
-        </p>
-        <p><strong>RAM instalada:</strong> {{ clienteSeleccionadoHardware?.ram || '---' }}</p>
+        <ng-container *ngIf="!cargandoArchivo && clienteSeleccionadoHardware; else sinDatosCard5">
+          <h4 class="titulo-card">Especificaciones del sistema</h4>
+
+          <nz-progress [nzType]="'circle'" [nzPercent]="porcentajeMemoriaDisponible"
+            [nzStrokeColor]="obtenerColorMemoria()" [nzFormat]="formatPorcentaje">
+          </nz-progress>
+
+          <p class="detalle-memoria">
+            {{ memoriaDisponibleGB.toFixed(2) }} GB de {{ memoriaTotalGB.toFixed(2) }} GB
+          </p>
+
+          <p>
+            RAM instalada:
+            <span [ngClass]="{'resaltado-desconocido': clienteSeleccionadoHardware.ram === 'Desconocido'}">
+              {{ clienteSeleccionadoHardware.ram }}
+            </span>
+          </p>
+
+          <p>
+            Memoria del sistema disponible:
+            <span
+              [ngClass]="{'resaltado-desconocido': clienteSeleccionadoHardware.memoriaDisponibleGB === 'Desconocido'}">
+              {{ clienteSeleccionadoHardware.memoriaDisponible }}
+            </span>
+          </p>
+
+          <p>
+            Memoria total disponible:
+            <span [ngClass]="{'resaltado-desconocido': clienteSeleccionadoHardware.memoriaTotalGB === 'Desconocido'}">
+              {{ clienteSeleccionadoHardware.memoriaTotal }}
+            </span>
+          </p>
+        </ng-container>
+
+        <ng-template #sinDatosCard5>
+          <div *ngIf="!cargandoArchivo" class="estado-vacio-card">
+            <img src="assets/icons/risk-icon.png" alt="Sin datos" />
+            <p>Debe realizar la carga de un archivo</p>
+          </div>
+        </ng-template>
       </div>
     </div>
 

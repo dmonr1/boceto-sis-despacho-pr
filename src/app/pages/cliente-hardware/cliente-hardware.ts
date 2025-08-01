@@ -17,42 +17,27 @@ import { read, utils } from 'xlsx';
 })
 export class ClienteHardware implements OnInit {
   datosHardware: any[] = [];
+  clientesFiltrados: any[] = [];
+  filtroCliente: string = '';
 
   memoriaDisponibleGB: number = 0;
   memoriaTotalGB: number = 0;
   porcentajeMemoriaDisponible: number = 0;
 
-  clienteSeleccionadoHardware: {
-    cliente: string;
-    cpu: string;
-    idCpu: string;
-    velocidadCpu: string;
-    ram: string;
-  
-    fabricanteSistema: string;
-    nombreSistema: string;
-    versionSistema: string;
-    familiaSistema: string;
-  
-    fabricanteBios: string;
-    fechaBios: string;
-    versionBios: string;
-  
-    fabricantePlaca: string;
-    placaBase: string;
-    versionPlaca: string;
-  } | null = null;
-
+  clienteSeleccionadoHardware: any = null;
   animarContenidoHardware: boolean = false;
 
   archivosHardware: any[] = [];
   mostrarDropdown = false;
+  cargandoArchivo = false;
+
+  idArchivo: number = 0;
 
   mostrarAlerta = false;
   tipoAlerta: 'success' | 'error' | 'warning' = 'success';
   mensajeAlerta = '';
 
-  constructor(private archivoService: Archivo) {}
+  constructor(private archivoService: Archivo) { }
 
   ngOnInit(): void {
     this.obtenerArchivosHardware();
@@ -61,6 +46,7 @@ export class ClienteHardware implements OnInit {
     if (guardado) {
       const { id, tipo } = JSON.parse(guardado);
       if (tipo === 'hardware') {
+        this.idArchivo = id;
         this.cargarArchivoHardwarePorId(id);
         return;
       }
@@ -69,11 +55,13 @@ export class ClienteHardware implements OnInit {
     this.mostrarNotificacion('warning', 'Debe seleccionar un archivo de tipo hardware desde la pestaña correspondiente.');
   }
 
+  get hayArchivoCargado(): boolean {
+    return !!sessionStorage.getItem('archivo_hardware_seleccionado');
+  }
+
   obtenerArchivosHardware(): void {
     this.archivoService.listarPorTipo('hardware').subscribe({
-      next: (res) => {
-        this.archivosHardware = res;
-      },
+      next: (res) => this.archivosHardware = res,
       error: () => this.mostrarNotificacion('error', 'No se pudo obtener la lista de archivos hardware.')
     });
   }
@@ -88,74 +76,83 @@ export class ClienteHardware implements OnInit {
       return;
     }
 
+    this.idArchivo = archivo.id;
     sessionStorage.setItem('archivo_hardware_seleccionado', JSON.stringify({ id: archivo.id, tipo: archivo.tipoArchivo }));
     this.mostrarDropdown = false;
     this.cargarArchivoHardwarePorId(archivo.id);
   }
 
+  obtenerValorSeguro(valor: any, textoPorDefecto: string = 'Desconocido'): string {
+    return valor && valor.toString().trim() !== '' ? valor : textoPorDefecto;
+  }
+
   cargarArchivoHardwarePorId(id: number): void {
+    this.cargandoArchivo = true;
     this.archivoService.descargarArchivoPorId(id).subscribe({
       next: async (blob) => {
-        const buffer = await blob.arrayBuffer();
-        const workbook = read(buffer, { type: 'array' });
-        const sheetName = workbook.SheetNames[0];
-        const datos = utils.sheet_to_json(workbook.Sheets[sheetName]);
-  
-        console.log('📄 Datos RAW del archivo Excel:', datos); // <-- ESTE LOG
-  
-        this.datosHardware = datos.map(fila => this.repararObjeto(fila));
-  
-        console.log('🔧 Datos REPARADOS del archivo Excel:', this.datosHardware); // <-- OPCIONAL
-  
-        if (this.datosHardware.length > 0) {
-          this.seleccionarClienteHardware(this.datosHardware[0]);
-        } else {
-          this.mostrarNotificacion('warning', 'El archivo de hardware está vacío o corrupto.');
+        try {
+          const buffer = await blob.arrayBuffer();
+          const workbook = read(buffer, { type: 'array' });
+          const sheetName = workbook.SheetNames[0];
+          const datos = utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+          console.log('Datos brutos:', datos);
+
+          this.datosHardware = datos.map(fila => this.repararObjeto(fila));
+          console.log('Datos reparados:', this.datosHardware);
+
+          this.clientesFiltrados = this.datosHardware;
+
+          if (this.datosHardware.length > 0) {
+            this.seleccionarClienteHardware(this.datosHardware[0]);
+          } else {
+            this.mostrarNotificacion('warning', 'El archivo de hardware está vacío o corrupto.');
+          }
+        } catch (e) {
+          console.error('Error procesando Excel:', e);
+          this.mostrarNotificacion('error', 'Error al procesar el archivo.');
+        } finally {
+          this.cargandoArchivo = false;
         }
       },
       error: () => {
         this.mostrarNotificacion('error', 'No se pudo cargar el archivo de hardware.');
+        this.cargandoArchivo = false;
       }
     });
   }
 
-  convertirFechaExcel(fechaSerial: number): string {
-    const fechaBase = new Date(1899, 11, 30); // Excel inicia en 1900-01-01, pero hay un desfase
-    const fecha = new Date(fechaBase.getTime() + fechaSerial * 86400000);
-    return fecha.toISOString().split('T')[0]; // Devuelve "YYYY-MM-DD"
-  }
-
   seleccionarClienteHardware(fila: any): void {
     this.clienteSeleccionadoHardware = {
-      cliente: fila['Cliente'] ?? '',
-      cpu: fila['CPU'] ?? '',
-      idCpu: fila['ID de la CPU'] ?? '',
-      velocidadCpu: fila['Velocidad de la CPU (MHz)'] ?? '',
-      ram: fila['RAM'] ?? '',
-  
-      fabricanteSistema: fila['Fabricante del sistema'] ?? '',
-      nombreSistema: fila['Nombre del sistema'] ?? '',
-      versionSistema: fila['Versión del sistema'] ?? '',
-      familiaSistema: fila['Familia del sistema'] ?? '',
-  
-      fabricanteBios: fila['Fabricante del BIOS'] ?? '',
-      fechaBios: fila['Fecha de publicación del BIOS'] ?? '',
-      versionBios: fila['Versión del BIOS'] ?? '',
-  
-      fabricantePlaca: fila['Fabricante de la placa base'] ?? '',
-      placaBase: fila['Placa base'] ?? '',
-      versionPlaca: fila['Versión de la placa base'] ?? ''
+      cliente: this.obtenerValorSeguro(fila['Cliente']),
+      cpu: this.obtenerValorSeguro(fila['CPU']),
+      idCpu: this.obtenerValorSeguro(fila['ID de la CPU']),
+      velocidadCpu: this.obtenerValorSeguro(fila['Velocidad de la CPU (MHz)']),
+      ram: this.obtenerValorSeguro(fila['RAM']),
+      fabricanteSistema: this.obtenerValorSeguro(fila['Fabricante del sistema']),
+      nombreSistema: this.obtenerValorSeguro(fila['Nombre del sistema']),
+      versionSistema: this.obtenerValorSeguro(fila['Versión del sistema']),
+      familiaSistema: this.obtenerValorSeguro(fila['Familia del sistema']),
+      fabricanteBios: this.obtenerValorSeguro(fila['Fabricante del BIOS']),
+      fechaBios: this.obtenerValorSeguro(fila['Fecha de publicación del BIOS']),
+      versionBios: this.obtenerValorSeguro(fila['Versión del BIOS']),
+      fabricantePlaca: this.obtenerValorSeguro(fila['Fabricante de la placa base']),
+      placaBase: this.obtenerValorSeguro(fila['Placa base']),
+      versionPlaca: this.obtenerValorSeguro(fila['Versión de la placa base']),
+      memoriaDisponible: this.obtenerValorSeguro(fila['Memoria del sistema disponible']),
+      memoriaTotal: this.obtenerValorSeguro(fila['Memoria total disponible']),
     };
-  
+
     this.memoriaDisponibleGB = this.convertirAMemoriaGB(fila['Memoria del sistema disponible']);
     this.memoriaTotalGB = this.convertirAMemoriaGB(fila['Memoria total disponible']);
-    this.porcentajeMemoriaDisponible =
-      this.memoriaTotalGB > 0 ? Math.round((this.memoriaDisponibleGB / this.memoriaTotalGB) * 100) : 0;
-  
+    this.porcentajeMemoriaDisponible = this.memoriaTotalGB > 0
+      ? Math.round((this.memoriaDisponibleGB / this.memoriaTotalGB) * 100)
+      : 0;
+
     this.animarContenidoHardware = false;
-    setTimeout(() => (this.animarContenidoHardware = true), 10);
+    setTimeout(() => this.animarContenidoHardware = true, 10);
   }
-  
+
   convertirAMemoriaGB(valor: string): number {
     if (!valor) return 0;
     valor = valor.replace(',', '.').trim().toUpperCase();
@@ -165,12 +162,60 @@ export class ClienteHardware implements OnInit {
     return 0;
   }
 
+  convertirFechaExcel(fechaSerial: number): string {
+    const fechaBase = new Date(1899, 11, 30);
+    const fecha = new Date(fechaBase.getTime() + fechaSerial * 86400000);
+    return fecha.toISOString().split('T')[0];
+  }
+
   formatPorcentaje = (): string => `${this.porcentajeMemoriaDisponible}%`;
 
   obtenerColorMemoria(): string {
     if (this.porcentajeMemoriaDisponible > 70) return '#52c41a';
     if (this.porcentajeMemoriaDisponible > 30) return '#faad14';
     return '#f5222d';
+  }
+
+
+  buscarCliente(): void {
+    const filtros = this.filtroCliente
+      .split(',')
+      .map(f => f.trim().toLowerCase())
+      .filter(f => f !== '');
+
+    if (filtros.length === 0) {
+      this.mostrarNotificacion('warning', 'Debe ingresar un nombre de cliente para buscar.');
+      this.filtroCliente = '';
+      this.clientesFiltrados = this.datosHardware;
+      return;
+    }
+
+    this.clientesFiltrados = this.datosHardware.filter(cliente => {
+      const nombre = (cliente['Cliente'] || '').toLowerCase();
+      return filtros.some(filtro => nombre.includes(filtro));
+    });
+  }
+
+  filtrarAlEscribir(): void {
+    const filtros = this.filtroCliente
+      .split(',')
+      .map(f => f.trim().toLowerCase())
+      .filter(f => f !== '');
+
+    this.clientesFiltrados = filtros.length === 0
+      ? this.datosHardware
+      : this.datosHardware.filter(cliente => {
+        const nombre = (cliente['Cliente'] || '').toLowerCase();
+        return filtros.some(filtro => nombre.includes(filtro));
+      });
+  }
+
+  validarBusqueda(): void {
+    const valor = this.filtroCliente.trim();
+    if (!valor) {
+      this.mostrarNotificacion('warning', 'Debe ingresar un nombre de cliente para buscar.');
+      this.clientesFiltrados = this.datosHardware;
+    }
   }
 
   obtenerLogoFabricante(fabricante: string | undefined): string {
@@ -182,8 +227,6 @@ export class ClienteHardware implements OnInit {
     if (clave.includes('intel')) return 'assets/images/logos-hardware/intel.png';
     if (clave.includes('toshiba')) return 'assets/images/logos-hardware/toshiba.png';
     if (clave.includes('vmware')) return 'assets/images/logos-hardware/Vmware.png';
-    if (clave === '' || clave === '---') return 'assets/images/logos-hardware/determinar.png';
-
     return 'assets/images/logos-hardware/determinar.png';
   }
 
@@ -199,10 +242,6 @@ export class ClienteHardware implements OnInit {
     return 'assets/images/logos-cpu/images.png';
   }
 
-  get letraAvatarHardware(): string {
-    return this.clienteSeleccionadoHardware?.cliente?.charAt(0)?.toUpperCase() || '-';
-  }
-
   mostrarNotificacion(tipo: 'success' | 'error' | 'warning', mensaje: string) {
     this.tipoAlerta = tipo;
     this.mensajeAlerta = mensaje;
@@ -216,37 +255,33 @@ export class ClienteHardware implements OnInit {
   private repararTexto(valor: any): string {
     if (!valor) return '';
     return valor.toString()
-      .replace(/Ã¡/g, 'á')
-      .replace(/Ã©/g, 'é')
-      .replace(/Ã­/g, 'í')
-      .replace(/Ã³/g, 'ó')
-      .replace(/Ãº/g, 'ú')
-      .replace(/Ã±/g, 'ñ')
-      .replace(/Ã/g, 'Á')
-      .replace(/Ã‰/g, 'É')
-      .replace(/Ã/g, 'Í')
-      .replace(/Ã“/g, 'Ó')
-      .replace(/Ãš/g, 'Ú')
-      .replace(/Ã‘/g, 'Ñ')
+      .replace(/Ã¡/g, 'á').replace(/Ã©/g, 'é').replace(/Ã­/g, 'í')
+      .replace(/Ã³/g, 'ó').replace(/Ãº/g, 'ú').replace(/Ã±/g, 'ñ')
+      .replace(/Ã/g, 'Á').replace(/Ã‰/g, 'É').replace(/Ã/g, 'Í')
+      .replace(/Ã“/g, 'Ó').replace(/Ãš/g, 'Ú').replace(/Ã‘/g, 'Ñ')
       .replace(/Ã/g, '');
   }
 
   private repararObjeto(obj: any): any {
     const reparado: any = {};
+
     for (const clave in obj) {
       let valor = this.repararTexto(obj[clave]);
-  
+
       if (clave.toLowerCase().includes('fecha')) {
         const numero = Number(valor);
         if (!isNaN(numero) && numero > 30000 && numero < 60000) {
           valor = this.convertirFechaExcel(numero);
         }
       }
-  
-      reparado[this.repararTexto(clave)] = valor;
+
+      if (valor === '---' || valor === '') {
+        valor = 'Desconocido';
+      }
+
+      reparado[this.repararTexto(clave).trim()] = valor;
     }
+
     return reparado;
   }
-  
-
 }

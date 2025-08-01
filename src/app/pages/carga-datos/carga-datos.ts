@@ -1,4 +1,4 @@
-import { Component, ViewChild, ElementRef, OnInit } from '@angular/core';
+import { Component, ViewChild, ElementRef, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { NzIconModule } from 'ng-zorro-antd/icon';
@@ -14,7 +14,7 @@ import * as XLSX from 'xlsx';
   templateUrl: './carga-datos.html',
   styleUrls: ['./carga-datos.scss']
 })
-export class CargaDatos implements OnInit {
+export class CargaDatos implements OnInit, OnDestroy {
   @ViewChild('inputArchivo') inputArchivo!: ElementRef<HTMLInputElement>;
 
   nombreArchivo = '';
@@ -33,6 +33,7 @@ export class CargaDatos implements OnInit {
   tipoAlerta: 'success' | 'error' | 'warning' = 'success';
   mensajeAlerta = '';
   mostrarPregunta = false;
+  reintentoIntervalo: any = null;
 
   constructor(
     private archivoService: Archivo,
@@ -41,6 +42,12 @@ export class CargaDatos implements OnInit {
 
   ngOnInit(): void {
     this.cargarTodosLosArchivos();
+  }
+
+  ngOnDestroy(): void {
+    if (this.reintentoIntervalo) {
+      clearInterval(this.reintentoIntervalo);
+    }
   }
 
   mostrarNotificacion(tipo: 'success' | 'error' | 'warning', mensaje: string) {
@@ -54,6 +61,11 @@ export class CargaDatos implements OnInit {
   }
 
   cargarTodosLosArchivos() {
+    if (this.reintentoIntervalo) {
+      clearInterval(this.reintentoIntervalo);
+      this.reintentoIntervalo = null;
+    }
+
     this.archivoService.listarTodos().subscribe({
       next: (archivos) => {
         this.archivosGuardados = archivos.sort((a, b) => {
@@ -69,14 +81,25 @@ export class CargaDatos implements OnInit {
             filaNueva.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }
         }, 300);
+
+        if (this.reintentoIntervalo) {
+          clearInterval(this.reintentoIntervalo);
+          this.reintentoIntervalo = null;
+        }
       },
       error: (err) => {
         console.error('Error al listar archivos:', err);
-        this.mostrarNotificacion('error', 'No hay respuesta del servidor. Intente más tarde.');
+        this.mostrarNotificacion('error', 'No hay respuesta del servidor. Reintentando en 1 minuto...');
+
+        if (!this.reintentoIntervalo) {
+          this.reintentoIntervalo = setInterval(() => {
+            console.log('Reintentando conexión con el servidor...');
+            this.cargarTodosLosArchivos();
+          }, 60000);
+        }
       }
     });
   }
-
 
   seleccionarArchivo() {
     this.inputArchivo.nativeElement.value = '';
@@ -208,11 +231,11 @@ export class CargaDatos implements OnInit {
   verDashboard(archivo: any) {
     const tipo = archivo.tipoArchivo;
     const id = archivo.id;
-  
+
     const claveStorage = `archivo_${tipo}_seleccionado`;
     sessionStorage.setItem(claveStorage, JSON.stringify({ id, tipo }));
-  
+
     this.router.navigate([`/dashboard/${tipo}`, id]);
   }
-  
+
 }

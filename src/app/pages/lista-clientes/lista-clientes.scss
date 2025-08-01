@@ -33,11 +33,16 @@
 .input-busqueda {
     width: 58%;
     padding: 7px 16px;
-    border-radius: 30px;
+    border-radius: 10px;
     border: 1px solid #ccc;
     font-size: 14px;
     outline: none;
     text-transform: uppercase;
+
+    &:focus {
+        outline: none;
+        border-color: #ff9c40;
+    }
 }
 
 .contador-clientes {
@@ -330,6 +335,7 @@ tr:hover {
 
 tr.selected {
     background-color: #ffe4d9;
+    z-index: 999;
 }
 
 .sin-datos {
@@ -398,7 +404,6 @@ tr.selected {
 
     .valor {
         font-weight: 500;
-        color: #333;
         text-align: right;
         max-width: 60%;
         word-break: break-word;
@@ -560,4 +565,19 @@ tr.selected {
         color: #d9d9d9;
         cursor: default;
     }
+}
+
+.resaltado-desconocido {
+    color: #d33f3f;
+    font-weight: 550;
+    background-color: #ffecec !important;
+    padding: 1px 10px;
+    border-radius: 8px;
+}
+
+.resaltado-desconocido-tabla {
+    color: #c41d1d;
+    font-weight: 550;
+    background-color: #ffe4d9;
+    padding: 1px 10px;
 }
