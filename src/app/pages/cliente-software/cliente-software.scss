@@ -15,7 +15,7 @@
 
     .lado-derecho {
         width: 50%;
-        // Por ahora vacío, se usará luego
+        // Espacio reservado para futuras funcionalidades
     }
 
     .subtitulo {
@@ -24,51 +24,71 @@
         margin-bottom: 18px;
     }
 
-    .barra-busqueda {
+    .barra-herramientas {
         display: flex;
         flex-wrap: wrap;
         align-items: center;
         gap: 10px;
-        margin-bottom: 15px;
+        margin-bottom: 18px;
 
-        input {
+        .input-busqueda {
             flex: 1;
             min-width: 200px;
-            padding: 8px 10px;
+            padding: 7px 12px;
             border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 14px;
-        }
+            border-radius: 8px;
+            font-size: 13px;
+            height: 36px;
+            transition: border-color 0.3s;
 
-        button {
-            padding: 8px 14px;
-            background-color: #1677ff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-
-            &:hover {
-                background-color: #0958d9;
+            &:focus {
+                outline: none;
+                border-color: #ff9c40;
             }
         }
 
-        .contador {
+        .btn-buscar {
+            padding: 7px 20px;
+            background: linear-gradient(135deg, #faaa3b, #ee9a24);
+            color: white;
+            border: none;
+            border-radius: 30px;
             font-size: 14px;
-            color: #595959;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(250, 170, 59, 0.3);
+
+            &:hover {
+                box-shadow: 0 6px 16px rgba(250, 170, 59, 0.45);
+            }
+        }
+
+        .contador-clientes {
+            font-size: 14px;
+            color: #555;
+            font-weight: 550;
+        }
+
+        .info-clientes {
+            position: relative;
+            margin-left: auto;
         }
 
         .btn-cambiar-archivo {
-            background-color: #52c41a;
+            padding: 7px 20px;
+            background: linear-gradient(135deg, #df2319, #c21a0e);
             color: white;
             border: none;
-            border-radius: 4px;
-            padding: 8px 12px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 500;
             cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(223, 35, 25, 0.3);
 
             &:hover {
-                background-color: #389e0d;
+                box-shadow: 0 6px 16px rgba(223, 35, 25, 0.45);
             }
         }
 
@@ -78,72 +98,118 @@
 
         .dropdown-archivos {
             position: absolute;
-            top: 38px;
+            top: 100%;
             left: 0;
-            z-index: 100;
+            z-index: 9999;
             background-color: white;
             border: 1px solid #d9d9d9;
-            border-radius: 4px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-            width: max-content;
-            min-width: 220px;
-            max-height: 250px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+            width: 230px;
+            max-height: 300px;
             overflow-y: auto;
+            padding: 5px 0;
 
             .opcion-dropdown {
                 padding: 8px 12px;
-                cursor: pointer;
                 font-size: 14px;
+                cursor: pointer;
+                border-bottom: 1px solid #f0f0f0;
 
                 &:hover {
                     background-color: #f5f5f5;
                 }
+
+                &:last-child {
+                    border-bottom: none;
+                }
             }
         }
     }
 
-    .card-tabla {
-        flex: 1;
-        overflow-y: auto;
-        border: 1px solid #d9d9d9;
-        border-radius: 6px;
-        padding: 10px;
-        background-color: #fafafa;
+    .card {
+        background-color: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        height: 100%;
+        padding: 0; // Quita relleno interno
+        overflow: hidden; // Para que la tabla respete bordes redondeados
     }
 
-    .tabla-clientes {
+    .tabla-hardware {
         width: 100%;
         border-collapse: collapse;
-        font-size: 14px;
+        table-layout: fixed;
 
         thead {
-            background-color: #e6f4ff;
+            display: table;
+            width: 100%;
+            table-layout: fixed;
+            background-color: #df2319;
+            color: white;
 
             th {
-                text-align: left;
-                padding: 10px;
-                border-bottom: 1px solid #d9d9d9;
+                padding: 12px 16px;
+                font-size: 13px;
+                font-weight: 550;
+                position: sticky;
+                top: 0;
+                background-color: #df2319;
+                z-index: 2;
+                border-bottom: 1px solid #ffffff55;
+                text-align: center;
+
+                &:nth-child(1) {
+                    width: 20%;
+                }
+
+                &:nth-child(2) {
+                    width: 20%;
+                }
+
+                &:nth-child(3) {
+                    width: 30%;
+                }
+
+                &:nth-child(4) {
+                    width: 30%;
+                }
             }
         }
 
         tbody {
+            display: block;
+            height: 62vh;
+            overflow-y: auto;
+            width: 100%;
+
             tr {
-                cursor: pointer;
+                display: table;
+                width: 100%;
+                table-layout: fixed;
                 transition: background-color 0.2s;
 
                 &:hover {
-                    background-color: #f0f0f0;
+                    background-color: #fff6f3;
                 }
 
-                td {
-                    padding: 10px;
-                    border-bottom: 1px solid #f0f0f0;
-                }
-
-                .sin-datos {
+                &.vacio td {
                     text-align: center;
                     color: #999;
                     font-style: italic;
+                    padding: 18px;
+                    background-color: #fff9f7;
+                }
+
+                td {
+                    padding: 10px 16px;
+                    font-size: 13px;
+                    border-bottom: 1px solid #e0e0e0;
+                    text-align: center;
+                    word-wrap: break-word;
                 }
             }
         }

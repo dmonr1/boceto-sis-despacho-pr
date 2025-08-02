@@ -25,8 +25,17 @@ export class ClienteSoftware {
 
   constructor(private archivoService: Archivo, private route: ActivatedRoute) {}
 
-  ngOnInit(): void {
-    console.log('🔁 ngOnInit() llamado');
+ngOnInit(): void {
+  console.log('🔁 ngOnInit() llamado');
+
+  const guardado = sessionStorage.getItem('archivo_software_seleccionado');
+  if (guardado) {
+    const { id, tipo } = JSON.parse(guardado);
+    if (tipo === 'software') {
+      this.idArchivo = id;
+      console.log('📦 ID recuperado de sessionStorage:', this.idArchivo);
+    }
+  } else {
     const idParam = this.route.snapshot.queryParamMap.get('id');
     if (idParam) {
       this.idArchivo = parseInt(idParam, 10);
@@ -34,23 +43,33 @@ export class ClienteSoftware {
     }
   }
 
+  this.obtenerArchivosSoftware();
+}
+
+
   toggleDropdown() {
     this.mostrarDropdown = !this.mostrarDropdown;
     console.log('📂 Toggle dropdown:', this.mostrarDropdown);
   }
 
-  cambiarArchivo(archivo: any) {
-    console.log('🔁 Cambiar archivo seleccionado:', archivo);
+cambiarArchivo(archivo: any) {
+  console.log('🔁 Cambiar archivo seleccionado:', archivo);
 
-    if (archivo.tipoArchivo !== 'software') {
-      this.mostrarNotificacion('warning', 'Solo se admiten archivos tipo Software.');
-      return;
-    }
-
-    this.idArchivo = archivo.id;
-    console.log('📌 Nuevo archivo seleccionado con ID:', this.idArchivo);
-    this.mostrarDropdown = false;
+  if (archivo.tipoArchivo !== 'software') {
+    this.mostrarNotificacion('warning', 'Solo se admiten archivos tipo Software.');
+    return;
   }
+
+  this.idArchivo = archivo.id;
+  sessionStorage.setItem('archivo_software_seleccionado', JSON.stringify({
+    id: archivo.id,
+    tipo: archivo.tipoArchivo
+  }));
+
+  this.mostrarDropdown = false;
+  console.log('📌 Archivo guardado en sessionStorage:', archivo);
+}
+
 
 
   buscarCliente() {
@@ -100,4 +119,23 @@ export class ClienteSoftware {
     console.log('✅ Notificación cerrada');
     this.mostrarAlerta = false;
   }
+
+  get hayArchivoCargado(): boolean {
+  return !!sessionStorage.getItem('archivo_software_seleccionado');
+}
+
+obtenerArchivosSoftware() {
+  this.archivoService.listarPorTipo('software').subscribe({
+    next: (res) => {
+      this.archivosSoftware = res;
+      console.log('📦 Archivos software cargados:', res);
+    },
+    error: (err) => {
+      console.error('❌ Error al obtener archivos software:', err);
+      this.mostrarNotificacion('error', 'No se pudieron cargar los archivos.');
+    }
+  });
+}
+
+
 }

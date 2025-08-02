@@ -228,17 +228,18 @@ export class CargaDatos implements OnInit, OnDestroy {
     this.archivosPaginados = this.archivosGuardados.slice(inicio, fin);
   }
 
-  verDashboard(archivo: any) {
-    const tipo = archivo.tipoArchivo;
-    const id = archivo.id;
-  
-    if (tipo === 'software') {
-      this.router.navigate(['/cliente-software'], { queryParams: { id } });
-    } else {
-      const claveStorage = `archivo_${tipo}_seleccionado`;
-      sessionStorage.setItem(claveStorage, JSON.stringify({ id, tipo }));
-      this.router.navigate([`/dashboard/${tipo}`, id]);
-    }
+verDashboard(archivo: any) {
+  const tipo = archivo.tipoArchivo;
+  const id = archivo.id;
+
+  if (tipo === 'software') {
+    sessionStorage.setItem('archivo_software_seleccionado', JSON.stringify({ id, tipo }));
+    this.router.navigate(['/cliente-software'], { queryParams: { id } });
+  } else {
+    const claveStorage = `archivo_${tipo}_seleccionado`;
+    sessionStorage.setItem(claveStorage, JSON.stringify({ id, tipo }));
+    this.router.navigate([`/dashboard/${tipo}`, id]);
   }
+}
 
 }

@@ -9,7 +9,7 @@ import { ClienteSoftware } from './pages/cliente-software/cliente-software';
 
 import { DashboardRouter } from './components/dashboard-router/dashboard-router';
 export const routes: Routes = [
-  { path: '', redirectTo: 'welcome', pathMatch: 'full' },
+  { path: '', redirectTo: 'carga-datos', pathMatch: 'full' },
   { path: 'login', component: Login },
   { path: 'welcome', component: WelcomeComponent, canActivate: [AuthGuard] },
   { path: 'carga-datos', component: CargaDatos, canActivate: [AuthGuard] },
