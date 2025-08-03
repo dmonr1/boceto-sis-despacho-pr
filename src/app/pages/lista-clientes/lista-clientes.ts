@@ -6,6 +6,7 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
 import { ActivatedRoute } from '@angular/router';
 import { read, utils } from 'xlsx';
 import html2pdf from 'html2pdf.js';
+import { Router } from '@angular/router';
 
 import { Archivo } from '../../services/archivo';
 import { AlertaPersonalizada } from '../../components/alerta-personalizada/alerta-personalizada';
@@ -35,7 +36,8 @@ export class ListaClientes {
   animarCambioArchivo = false;
 
   constructor(private route: ActivatedRoute, 
-    private archivoService: Archivo) { }
+    private archivoService: Archivo,
+    router: Router) { }
 
   ngOnInit(): void {
     this.obtenerArchivosResumen();

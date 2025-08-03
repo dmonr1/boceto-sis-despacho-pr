@@ -65,17 +65,10 @@
                             [ngClass]="{'resaltado-desconocido-tabla': obtenerValorSeguro(fila.estado) === 'Desconocido'}">
                             {{ obtenerValorSeguro(fila.estado) }}
                         </td>
-                        <td class="columna-info-tecnica">
-                            <div class="contenedor-botones-info">
-                                <button class="btn-icono hardware" title="Hardware">
-                                    <nz-icon nzType="desktop"></nz-icon>
-                                    <span class="texto-icono">Hardware</span>
-                                </button>
-                                <button class="btn-icono software" title="Software">
-                                    <nz-icon nzType="windows"></nz-icon>
-                                    <span class="texto-icono">Software</span>
-                                </button>
-                            </div>
+
+                        <td
+                            [ngClass]="{'resaltado-desconocido-tabla': obtenerValorSeguro(fila.version) === 'Desconocido'}">
+                            {{ obtenerValorSeguro(fila.estado) }}
                         </td>
 
 

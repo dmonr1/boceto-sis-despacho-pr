@@ -416,6 +416,7 @@ tr.selected {
     margin-top: 25px;
 }
 
+
 .btn-pdf {
     display: flex;
     align-items: center;
@@ -582,52 +583,4 @@ tr.selected {
     padding: 1px 10px;
 }
 
-.columna-info-tecnica {
-  width: 200px;
-  text-align: center;
-  vertical-align: middle;
 
-  .contenedor-botones-info {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    padding: 6px 0;
-    flex-wrap: wrap;
-  }
-
-  .btn-icono {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
-    border: none;
-    border-radius: 40px;
-    font-size: 13px;
-    font-weight: 500;
-    color: #ffffff;
-    cursor: pointer;
-    transition: transform 0.2s ease;
-    white-space: nowrap;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
-    background: white; // fallback
-
-    nz-icon {
-      font-size: 16px;
-    }
-
-    &:hover {
-      transform: scale(1.05);
-    }
-
-    &.hardware {
-      background: linear-gradient(to right,#ffa39e, #cf1322); // Blanco → rojo claro → rojo fuerte
-      color: #722222;
-    }
-
-    &.software {
-    background: linear-gradient(135deg, #faaa3b, #ee9a24);
-      color: #ffffff;
-    }
-  }
-}

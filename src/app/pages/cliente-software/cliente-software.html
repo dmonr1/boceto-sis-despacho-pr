@@ -1,17 +1,17 @@
 <div class="contenedor-software">
   <div class="lado-izquierdo">
-  <h2 class="subtitulo">Búsqueda por Cliente</h2>
+    <h2 class="subtitulo">Búsqueda por Cliente</h2>
 
-  <div class="barra-herramientas">
-    <input type="text" [(ngModel)]="textoBusqueda" (keydown.enter)="buscarCliente()"
-      placeholder="Nombre del cliente..." class="input-busqueda" />
+    <div class="barra-herramientas">
+      <div class="grupo-busqueda">
+        <input type="text" [(ngModel)]="textoBusqueda" (keydown.enter)="buscarCliente()"
+          placeholder="Nombre del cliente..." class="input-busqueda" />
+        <button class="btn-buscar" (click)="buscarCliente()">Buscar</button>
+      </div>
 
-    <button class="btn-buscar" (click)="buscarCliente()">Buscar</button>
+      <span class="contador-clientes">N° Registros: {{ datosFiltrados.length }}</span>
 
-    <span class="contador-clientes">N° Registros: {{ datosFiltrados.length }}</span>
-
-    <div class="info-clientes" (clickOutside)="mostrarDropdown = false">
-      <div class="dropdown-container">
+      <div class="dropdown-container" (clickOutside)="mostrarDropdown = false">
         <button class="btn-cambiar-archivo" (click)="toggleDropdown()">
           {{ hayArchivoCargado ? 'Cambiar archivo' : 'Elegir archivo' }}
           <nz-icon nzType="down" style="margin-left: 6px;"></nz-icon>
@@ -29,47 +29,44 @@
         </div>
       </div>
     </div>
-  </div>
 
-  <div class="card">
-    <table class="tabla-hardware">
-      <thead>
-        <tr>
-          <th>Cliente</th>
-          <th>Instalado</th>
-          <th>Nombre</th>
-          <th>Fecha de instalación</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngIf="datosFiltrados.length === 0" class="vacio">
-          <td colspan="4">Por favor ingrese un archivo y realice la búsqueda.</td>
-        </tr>
-        <tr *ngFor="let fila of datosFiltrados">
-          <td [ngClass]="{ 'resaltado-desconocido-tabla': obtenerValorSeguro(fila.cliente) === 'Desconocido' }">
-            {{ obtenerValorSeguro(fila.cliente) }}
-          </td>
-          <td [ngClass]="{ 'resaltado-desconocido-tabla': obtenerValorSeguro(fila.instalado) === 'Desconocido' }">
-            {{ obtenerValorSeguro(fila.instalado) }}
-          </td>
-          <td [ngClass]="{ 'resaltado-desconocido-tabla': obtenerValorSeguro(fila.nombre) === 'Desconocido' }">
-            {{ obtenerValorSeguro(fila.nombre) }}
-          </td>
-          <td [ngClass]="{ 'resaltado-desconocido-tabla': obtenerValorSeguro(fila.fecha) === 'Desconocido' }">
-            {{ obtenerValorSeguro(fila.fecha) }}
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="card">
+      <table class="tabla-hardware">
+        <thead>
+          <tr>
+            <th>Cliente</th>
+            <th>Instalado</th>
+            <th>Nombre</th>
+            <th>Fecha de instalación</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="datosFiltrados.length === 0" class="vacio">
+            <td colspan="4">Por favor ingrese un archivo y realice la búsqueda.</td>
+          </tr>
+          <tr *ngFor="let fila of datosFiltrados">
+            <td [ngClass]="{ 'resaltado-desconocido-tabla': obtenerValorSeguro(fila.cliente) === 'Desconocido' }">
+              {{ obtenerValorSeguro(fila.cliente) }}
+            </td>
+            <td [ngClass]="{ 'resaltado-desconocido-tabla': obtenerValorSeguro(fila.instalado) === 'Desconocido' }">
+              {{ obtenerValorSeguro(fila.instalado) }}
+            </td>
+            <td [ngClass]="{ 'resaltado-desconocido-tabla': obtenerValorSeguro(fila.nombre) === 'Desconocido' }">
+              {{ obtenerValorSeguro(fila.nombre) }}
+            </td>
+            <td [ngClass]="{ 'resaltado-desconocido-tabla': obtenerValorSeguro(fila.fecha) === 'Desconocido' }">
+              {{ obtenerValorSeguro(fila.fecha) }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
-</div>
-
 
   <div class="lado-derecho">
     <!-- Espacio reservado para el diseño futuro -->
   </div>
 
-  <!-- ALERTA -->
   <app-alerta-personalizada [visible]="mostrarAlerta" [tipo]="tipoAlerta" [mensaje]="mensajeAlerta"
     (aceptar)="cerrarNotificacion()" (cancelar)="cerrarNotificacion()"></app-alerta-personalizada>
 </div>
