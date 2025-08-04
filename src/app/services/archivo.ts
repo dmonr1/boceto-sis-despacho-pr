@@ -50,4 +50,16 @@ export class Archivo {
       params: { cliente }
     });
   }
+
+  obtenerClientesUnicosSoftware(id: number): Observable<string[]> {
+    return this.http.get<string[]>(`${this.apiUrl}/${id}/software-clientes-unicos`);
+  }
+  
+  obtenerClientesUnicosHardware(id: number) {
+    return this.http.get<string[]>(`${this.apiUrl}/${id}/hardware-clientes-unicos`);
+  }
+
+  obtenerClientesUnicosResumen(id: number): Observable<string[]> {
+    return this.http.get<string[]>(`${this.apiUrl}/${id}/resumen-clientes-unicos`);
+  }
 }

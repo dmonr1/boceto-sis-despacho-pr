@@ -34,6 +34,7 @@ export class ListaClientes {
   archivosResumen: any[] = [];
   mostrarDropdown = false;
   animarCambioArchivo = false;
+  clientesUnicosResumen: string[] = [];
 
   constructor(private route: ActivatedRoute, 
     private archivoService: Archivo,
@@ -104,23 +105,29 @@ export class ListaClientes {
         const workbook = read(buffer, { type: 'array' });
         const sheetName = workbook.SheetNames[0];
         const datos = utils.sheet_to_json(workbook.Sheets[sheetName]);
-
-        console.log(datos);
-
-
+  
         if (!datos || datos.length === 0) {
           this.mostrarNotificacion('warning', 'El archivo seleccionado no contiene datos.');
           return;
         }
-
+  
         this.procesarDatos(datos);
+  
+        // Cargar clientes únicos desde backend
+        this.archivoService.obtenerClientesUnicosResumen(id).subscribe({
+          next: (clientes) => this.clientesUnicosResumen = clientes.map(c => c.toLowerCase()),
+          error: () => this.mostrarNotificacion('error', 'No se pudieron obtener los clientes únicos.')
+        });
       },
       error: () => {
         this.mostrarNotificacion('error', 'Ocurrió un error al descargar el archivo.');
       }
     });
   }
+  
 
+
+  
   private convertirFechaExcel(valor: any): string {
     if (!isNaN(valor) && typeof valor === 'number') {
       const fecha = new Date((valor - 25569) * 86400 * 1000);
@@ -200,17 +207,28 @@ export class ListaClientes {
       this.mostrarNotificacion('warning', 'Debe ingresar un nombre de cliente para buscar.');
       return;
     }
-
+  
     const texto = this.textoBusqueda.trim().toLowerCase();
     const terminos = texto.split(',').map(t => t.trim()).filter(t => t);
-
+  
+    // 🔒 Validar si al menos uno existe en el archivo
+    const algunoExiste = terminos.some(termino =>
+      this.clientesUnicosResumen.includes(termino)
+    );
+  
+    if (!algunoExiste) {
+      this.mostrarNotificacion('error', 'El cliente ingresado no existe en el archivo.');
+      return;
+    }
+  
     this.datosFiltrados = this.datosOriginales.filter(cliente =>
       terminos.some(termino => cliente.cliente.toLowerCase().includes(termino))
     );
-
+  
     this.indiceClienteActual = 0;
     this.seleccionarCliente(this.datosFiltrados[this.indiceClienteActual] || null);
   }
+  
 
   cambiarCliente(direccion: number) {
     const nuevoIndice = this.indiceClienteActual + direccion;

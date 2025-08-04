@@ -129,7 +129,7 @@
     <div class="contenedor-tabla">
       <div class="barra-herramientas">
         <input type="text" [(ngModel)]="filtroCliente" (input)="filtrarAlEscribir()" (keydown.enter)="validarBusqueda()"
-          placeholder="Buscar cliente..." class="input-busqueda" />
+          placeholder="Buscar cliente..." class="input-busqueda"   style="text-transform: uppercase;" />
 
         <button class="btn-buscar" (click)="validarBusqueda()">Buscar</button>
         <span class="contador-clientes">Mostrando {{ clientesFiltrados.length }} clientes</span>

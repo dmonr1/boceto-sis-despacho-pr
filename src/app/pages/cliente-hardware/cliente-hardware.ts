@@ -96,10 +96,7 @@ export class ClienteHardware implements OnInit {
           const sheetName = workbook.SheetNames[0];
           const datos = utils.sheet_to_json(workbook.Sheets[sheetName]);
 
-          console.log('Datos brutos:', datos);
-
           this.datosHardware = datos.map(fila => this.repararObjeto(fila));
-          console.log('Datos reparados:', this.datosHardware);
 
           this.clientesFiltrados = this.datosHardware;
 
@@ -178,23 +175,43 @@ export class ClienteHardware implements OnInit {
 
 
   buscarCliente(): void {
-    const filtros = this.filtroCliente
-      .split(',')
-      .map(f => f.trim().toLowerCase())
-      .filter(f => f !== '');
-
-    if (filtros.length === 0) {
+    const nombreBuscado = this.filtroCliente.trim();
+    if (!nombreBuscado) {
       this.mostrarNotificacion('warning', 'Debe ingresar un nombre de cliente para buscar.');
-      this.filtroCliente = '';
       this.clientesFiltrados = this.datosHardware;
       return;
     }
 
-    this.clientesFiltrados = this.datosHardware.filter(cliente => {
-      const nombre = (cliente['Cliente'] || '').toLowerCase();
-      return filtros.some(filtro => nombre.includes(filtro));
+    if (!this.idArchivo) {
+      this.mostrarNotificacion('warning', 'Debe seleccionar un archivo primero.');
+      return;
+    }
+
+    this.archivoService.obtenerClientesUnicosHardware(this.idArchivo).subscribe({
+      next: (clientes) => {
+        const existe = clientes.some(nombre => nombre.toLowerCase() === nombreBuscado.toLowerCase());
+
+        if (!existe) {
+          this.mostrarNotificacion('error', `El cliente "${nombreBuscado}" no se encuentra en el archivo.`);
+          return;
+        }
+
+        this.clientesFiltrados = this.datosHardware.filter(cliente =>
+          (cliente['Cliente'] || '').toLowerCase().includes(nombreBuscado.toLowerCase())
+        );
+
+        if (this.clientesFiltrados.length > 0) {
+          this.seleccionarClienteHardware(this.clientesFiltrados[0]);
+        } else {
+          this.mostrarNotificacion('warning', 'No se encontraron registros para ese cliente.');
+        }
+      },
+      error: () => {
+        this.mostrarNotificacion('error', 'No se pudo validar el cliente en el servidor.');
+      }
     });
   }
+
 
   filtrarAlEscribir(): void {
     const filtros = this.filtroCliente
@@ -211,12 +228,9 @@ export class ClienteHardware implements OnInit {
   }
 
   validarBusqueda(): void {
-    const valor = this.filtroCliente.trim();
-    if (!valor) {
-      this.mostrarNotificacion('warning', 'Debe ingresar un nombre de cliente para buscar.');
-      this.clientesFiltrados = this.datosHardware;
-    }
+    this.buscarCliente();
   }
+
 
   obtenerLogoFabricante(fabricante: string | undefined): string {
     const clave = (fabricante || '').toLowerCase().trim();

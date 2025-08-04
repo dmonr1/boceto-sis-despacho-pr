@@ -93,7 +93,6 @@ export class CargaDatos implements OnInit, OnDestroy {
 
         if (!this.reintentoIntervalo) {
           this.reintentoIntervalo = setInterval(() => {
-            console.log('Reintentando conexión con el servidor...');
             this.cargarTodosLosArchivos();
           }, 60000);
         }

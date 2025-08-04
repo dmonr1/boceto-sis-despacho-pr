@@ -5,7 +5,7 @@
     <div class="barra-herramientas">
       <div class="grupo-busqueda">
         <input type="text" [(ngModel)]="textoBusqueda" (keydown.enter)="buscarCliente()"
-          placeholder="Nombre del cliente..." class="input-busqueda" />
+          placeholder="Nombre del cliente..." class="input-busqueda" style="text-transform: uppercase;" />
         <button class="btn-buscar" (click)="buscarCliente()">Buscar</button>
       </div>
 
@@ -35,16 +35,13 @@
         <thead>
           <tr>
             <th>Cliente</th>
-            <th>Instalado</th>
-            <th>Nombre</th>
+            <th>¿Instalado?</th>
+            <th>Nombre de software</th>
             <th>Fecha de instalación</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngIf="datosFiltrados.length === 0" class="vacio">
-            <td colspan="4">Por favor ingrese un archivo y realice la búsqueda.</td>
-          </tr>
-          <tr *ngFor="let fila of datosFiltrados">
+          <tr *ngFor="let fila of datosFiltrados" (click)="mostrarHistorialSoftware(fila)">
             <td [ngClass]="{ 'resaltado-desconocido-tabla': obtenerValorSeguro(fila.cliente) === 'Desconocido' }">
               {{ obtenerValorSeguro(fila.cliente) }}
             </td>
@@ -58,15 +55,47 @@
               {{ obtenerValorSeguro(fila.fecha) }}
             </td>
           </tr>
+          
         </tbody>
       </table>
     </div>
   </div>
 
-  <div class="lado-derecho">
-    <!-- Espacio reservado para el diseño futuro -->
-  </div>
 
+  <div class="lado-derecho">
+    <!-- Card superior: Historial de versiones -->
+    <div class="contenedor-detalles">
+      <div class="card-detalle">
+        <h3 class="titulo-card">Historial de versiones software seleccionado</h3>
+        <div class="lista-versiones">
+          <div class="fila-cabecera">
+            <span>Software</span>
+            <span>Versión</span>
+            <span>Fecha instalación</span>
+          </div>
+          <div
+            *ngFor="let version of historialVersiones"
+            class="fila-version"
+            [class.ultima-version]="version.fecha === ultimaFechaVersion"
+          >
+            <span>{{ version.nombre }}</span>
+            <span>{{ version.version || 'Desconocido' }}</span>
+            <span>{{ version.fecha || 'Desconocido' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Card inferior: gráfico de barras -->
+    <div class="contenedor-graficos">
+      <div class="card-grafico">
+        <h4 class="titulo-grafico">Software instalado por fabricante</h4>
+        <canvas id="graficoBarras"></canvas>
+      </div>
+    </div>
+  </div>
+  
+  
   <app-alerta-personalizada [visible]="mostrarAlerta" [tipo]="tipoAlerta" [mensaje]="mensajeAlerta"
     (aceptar)="cerrarNotificacion()" (cancelar)="cerrarNotificacion()"></app-alerta-personalizada>
 </div>
