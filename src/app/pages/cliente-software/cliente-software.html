@@ -1,101 +1,151 @@
-<div class="contenedor-software">
-  <div class="lado-izquierdo">
-    <h2 class="subtitulo">Búsqueda por Cliente</h2>
-
-    <div class="barra-herramientas">
-      <div class="grupo-busqueda">
-        <input type="text" [(ngModel)]="textoBusqueda" (keydown.enter)="buscarCliente()"
-          placeholder="Nombre del cliente..." class="input-busqueda" style="text-transform: uppercase;" />
-        <button class="btn-buscar" (click)="buscarCliente()">Buscar</button>
-      </div>
-
-      <span class="contador-clientes">N° Registros: {{ datosFiltrados.length }}</span>
-
-      <div class="dropdown-container" (clickOutside)="mostrarDropdown = false">
-        <button class="btn-cambiar-archivo" (click)="toggleDropdown()">
-          {{ hayArchivoCargado ? 'Cambiar archivo' : 'Elegir archivo' }}
-          <nz-icon nzType="down" style="margin-left: 6px;"></nz-icon>
-        </button>
-
-        <div *ngIf="mostrarDropdown" class="dropdown-archivos">
-          <div *ngIf="archivosSoftware.length === 0" class="opcion-dropdown">
-            No hay archivos software
+<div class="contenedor-principal-scroll">
+  <div class="contenedor-software">
+    <div class="lado-izquierdo">
+      <h2 class="subtitulo">Búsqueda por Cliente</h2>
+      <div class="barra-herramientas">
+        <div class="grupo-busqueda">
+          <div class="autocomplete-container">
+            <input type="text" [(ngModel)]="textoBusqueda" (input)="filtrarClientes()" (focus)="inputActivo = true"
+              (blur)="ocultarListaConRetraso()" (keydown.enter)="buscarCliente()" placeholder="Nombre del cliente..."
+              class="input-busqueda" style="text-transform: uppercase;" />
+            <ul *ngIf="inputActivo && clientesFiltrados.length > 0" class="autocomplete-list">
+              <li *ngFor="let cliente of clientesFiltrados | slice:0:30"
+                (mousedown)="seleccionarClienteDesdeLista(cliente)">
+                {{ cliente }}
+              </li>
+            </ul>
           </div>
-          <div *ngFor="let archivo of archivosSoftware" class="opcion-dropdown" (click)="cambiarArchivo(archivo)">
-            {{ archivo.nombreOriginal }}
-            <nz-icon *ngIf="archivo.id === idArchivo" nzType="check"
-              [ngStyle]="{ color: '#3b3b3b', float: 'right' }"></nz-icon>
+          <button class="btn-buscar" (click)="buscarCliente()">Buscar</button>
+        </div>
+
+        <span class="contador-clientes">N° Registros: {{ datosFiltrados.length }}</span>
+
+        <div class="zona-secundaria">
+          <div class="dropdown-container" (clickOutside)="mostrarDropdown = false">
+            <button class="btn-cambiar-archivo" (click)="toggleDropdown()">
+              {{ hayArchivoCargado ? 'Cambiar archivo' : 'Elegir archivo' }}
+              <nz-icon nzType="down" style="margin-left: 6px;"></nz-icon>
+            </button>
+
+            <div *ngIf="mostrarDropdown" class="dropdown-archivos">
+              <div *ngIf="archivosSoftware.length === 0" class="opcion-dropdown">
+                No hay archivos software
+              </div>
+              <div *ngFor="let archivo of archivosSoftware" class="opcion-dropdown" (click)="cambiarArchivo(archivo)">
+                {{ archivo.nombreOriginal }}
+                <nz-icon *ngIf="archivo.id === idArchivo" nzType="check"
+                  [ngStyle]="{ color: '#3b3b3b', float: 'right' }"></nz-icon>
+              </div>
+            </div>
           </div>
+
+          <input type="text" [(ngModel)]="filtroSoftware" (input)="filtrarPorSoftware()" placeholder="Buscar software"
+            class="input-filtrar-software" />
+
+          <button class="btn-limpiar">
+            <nz-icon nzType="delete" style="margin-right: 6px;"></nz-icon>
+            Limpiar
+          </button>
+
         </div>
       </div>
-    </div>
 
-    <div class="card">
-      <table class="tabla-hardware">
-        <thead>
-          <tr>
-            <th>Cliente</th>
-            <th>¿Instalado?</th>
-            <th>Nombre de software</th>
-            <th>Fecha de instalación</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let fila of datosFiltrados" (click)="mostrarHistorialSoftware(fila)">
-            <td [ngClass]="{ 'resaltado-desconocido-tabla': obtenerValorSeguro(fila.cliente) === 'Desconocido' }">
-              {{ obtenerValorSeguro(fila.cliente) }}
-            </td>
-            <td [ngClass]="{ 'resaltado-desconocido-tabla': obtenerValorSeguro(fila.instalado) === 'Desconocido' }">
-              {{ obtenerValorSeguro(fila.instalado) }}
-            </td>
-            <td [ngClass]="{ 'resaltado-desconocido-tabla': obtenerValorSeguro(fila.nombre) === 'Desconocido' }">
-              {{ obtenerValorSeguro(fila.nombre) }}
-            </td>
-            <td [ngClass]="{ 'resaltado-desconocido-tabla': obtenerValorSeguro(fila.fecha) === 'Desconocido' }">
-              {{ obtenerValorSeguro(fila.fecha) }}
-            </td>
-          </tr>
-          
-        </tbody>
-      </table>
+
+
+      <div class="card">
+        <table class="tabla-software">
+          <thead>
+            <tr>
+              <th>Cliente</th>
+              <th>¿Instalado?</th>
+              <th>Nombre de software</th>
+              <th>Fecha de instalación</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngIf="datosFiltrados.length === 0" class="vacio">
+              <td colspan="4">Por favor ingrese un archivo y realice la búsqueda.</td>
+            </tr>
+            <tr *ngFor="let fila of datosFiltrados" (click)="seleccionarFilaTabla(fila)"
+              [class.activa]="fila === filaSeleccionada">
+              <td [ngClass]="{ 'resaltado-desconocido-tabla': obtenerValorSeguro(fila.cliente) === 'Desconocido' }">
+                {{ obtenerValorSeguro(fila.cliente) }}
+              </td>
+              <td [ngClass]="{ 'resaltado-desconocido-tabla': obtenerValorSeguro(fila.instalado) === 'Desconocido' }">
+                {{ obtenerValorSeguro(fila.instalado) }}
+              </td>
+              <td [ngClass]="{ 'resaltado-desconocido-tabla': obtenerValorSeguro(fila.nombre) === 'Desconocido' }">
+                {{ obtenerValorSeguro(fila.nombre) }}
+              </td>
+              <td [ngClass]="{ 'resaltado-desconocido-tabla': obtenerValorSeguro(fila.fecha) === 'Desconocido' }">
+                {{ obtenerValorSeguro(fila.fecha) }}
+              </td>
+            </tr>
+
+
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="lado-derecho">
+
+      <div class="contenedor-detalles">
+        <div class="card-detalle">
+
+          <ng-container *ngIf="filaSeleccionada; else sinClienteSeleccionado">
+            <h3 class="titulo-card">Historial de versiones software seleccionado</h3>
+
+            <p>N" de versiones instaladas: {{historialVersiones.length}}</p>
+
+            <div class="lista-versiones">
+              <div class="fila-cabecera">
+                <span>Software</span>
+                <span>Versión</span>
+                <span>¿Instalado?</span>
+                <span>Fecha instalación</span>
+              </div>
+              <div *ngFor="let version of historialVersiones" class="fila-version" [class.ultima-version]="
+                  version.fecha === ultimaFechaVersion || 
+                  (!ultimaFechaVersion && version.version === ultimaVersionNombre)">
+                <span>{{ version.nombre }}</span>
+                <span>{{ version.version || 'Desconocido' }}</span>
+                <span>{{ version.instalado}}</span>
+                <span>{{ version.fecha || 'Desconocido' }}</span>
+              </div>
+            </div>
+          </ng-container>
+
+          <ng-template #sinClienteSeleccionado>
+            <div class="estado-vacio">
+              <img src="assets/icons/risk-icon.png" alt="Advertencia" class="icono-vacio" />
+              <p class="mensaje-vacio">Debe seleccionar un cliente</p>
+            </div>
+          </ng-template>
+
+        </div>
+      </div>
+
+
+
+      <div class="contenedor-graficos">
+        <div class="card-grafico">
+          <h4 class="titulo-grafico">Historial de instalaciones</h4>
+          <canvas id="graficoLineas"></canvas>
+        </div>
+
+
+      </div>
+
     </div>
   </div>
 
-
-  <div class="lado-derecho">
-    <!-- Card superior: Historial de versiones -->
-    <div class="contenedor-detalles">
-      <div class="card-detalle">
-        <h3 class="titulo-card">Historial de versiones software seleccionado</h3>
-        <div class="lista-versiones">
-          <div class="fila-cabecera">
-            <span>Software</span>
-            <span>Versión</span>
-            <span>Fecha instalación</span>
-          </div>
-          <div
-            *ngFor="let version of historialVersiones"
-            class="fila-version"
-            [class.ultima-version]="version.fecha === ultimaFechaVersion"
-          >
-            <span>{{ version.nombre }}</span>
-            <span>{{ version.version || 'Desconocido' }}</span>
-            <span>{{ version.fecha || 'Desconocido' }}</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  
-    <!-- Card inferior: gráfico de barras -->
-    <div class="contenedor-graficos">
-      <div class="card-grafico">
-        <h4 class="titulo-grafico">Software instalado por fabricante</h4>
-        <canvas id="graficoBarras"></canvas>
-      </div>
+  <div class="contenedor-inferior">
+    <div class="card-inferior">
+      <h4>Cantidad de softwares por Fabricante</h4>
+      <canvas id="graficoBarras"></canvas>
     </div>
   </div>
-  
-  
-  <app-alerta-personalizada [visible]="mostrarAlerta" [tipo]="tipoAlerta" [mensaje]="mensajeAlerta"
-    (aceptar)="cerrarNotificacion()" (cancelar)="cerrarNotificacion()"></app-alerta-personalizada>
 </div>
+
+<app-alerta-personalizada [visible]="mostrarAlerta" [tipo]="tipoAlerta" [mensaje]="mensajeAlerta"
+  (aceptar)="cerrarNotificacion()" (cancelar)="cerrarNotificacion()"></app-alerta-personalizada>

@@ -218,7 +218,6 @@ tr.selected {
   background-color: #fff9f7;
 }
 
-/* Animaciones */
 @keyframes fadeInDown {
   0% {
     opacity: 0;
@@ -527,13 +526,13 @@ tr.selected {
     width: 55px;
     height: auto;
     margin-bottom: 12px;
-    opacity: 0.7;
+    opacity: 0.9;
   }
 
   p {
     font-size: 14px;
-    font-weight: 500;
-    color: #666;
+    font-weight: 600;
+    color: #444;
   }
 }
 

@@ -27,7 +27,15 @@ export class ClienteSoftware {
   mensajeAlerta = '';
   cantidadInstalados = 0;
 
-  constructor(private archivoService: Archivo, private route: ActivatedRoute) {}
+  todosLosClientes: string[] = [];
+  clientesFiltrados: string[] = [];
+
+  filaSeleccionada: any = null;
+  historialVersiones: any[] = [];
+  ultimaFechaVersion: string = '';
+  ultimaVersionNombre: string = '';
+
+  constructor(private archivoService: Archivo, private route: ActivatedRoute) { }
 
   ngOnInit(): void {
     const guardado = sessionStorage.getItem('archivo_software_seleccionado');
@@ -44,6 +52,13 @@ export class ClienteSoftware {
     }
 
     this.obtenerArchivosSoftware();
+    if (this.idArchivo) {
+      this.obtenerTodosLosClientes();
+    }
+  }
+
+  get hayArchivoCargado(): boolean {
+    return !!sessionStorage.getItem('archivo_software_seleccionado');
   }
 
   toggleDropdown() {
@@ -63,7 +78,55 @@ export class ClienteSoftware {
     }));
 
     this.mostrarDropdown = false;
+    this.obtenerTodosLosClientes(); // recarga lista de clientes
   }
+
+  seleccionarFilaTabla(fila: any) {
+    this.filaSeleccionada = fila;
+    this.mostrarHistorialSoftware(fila);
+  }
+
+  filtrarClientes() {
+    const texto = this.textoBusqueda.trim().toLowerCase();
+    if (!texto) {
+      this.clientesFiltrados = [...this.todosLosClientes];
+      return;
+    }
+
+    this.clientesFiltrados = this.todosLosClientes.filter(cliente =>
+      cliente.toLowerCase().includes(texto)
+    ).slice(0, 50);
+  }
+
+  seleccionarClienteDesdeLista(cliente: string) {
+    this.textoBusqueda = cliente;
+    this.inputActivo = false;
+    this.clientesFiltrados = [];
+  
+    // Esperar al siguiente ciclo para asegurar que textoBusqueda ya cambió
+    setTimeout(() => {
+      this.buscarCliente();
+    }, 0);
+  }
+  
+
+  filtroSoftware: string = '';
+  datosFiltradosOriginal: any[] = [];
+
+
+  filtrarPorSoftware() {
+    const texto = this.filtroSoftware.trim().toLowerCase();
+  
+    if (!texto) {
+      this.datosFiltrados = [...this.datosFiltradosOriginal];
+      return;
+    }
+  
+    this.datosFiltrados = this.datosFiltradosOriginal.filter(d =>
+      (d.nombre || '').toLowerCase().includes(texto)
+    );
+  }
+
 
   buscarCliente() {
     const texto = this.textoBusqueda.trim();
@@ -89,16 +152,57 @@ export class ClienteSoftware {
 
         this.archivoService.obtenerDatosSoftware(this.idArchivo, texto).subscribe({
           next: (res) => {
-            this.datosFiltrados = res.filter(item => {
-              const valor = (item.instalado || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().trim();
-              return valor === 'SI';
-            });
+            const normalizados = res.map(item => ({
+              ...item,
+              nombre: (item.nombre || '').trim(),
+              instalado: (item.instalado || '')
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .toUpperCase()
+                .trim()
+            }));
 
-            if (this.datosFiltrados.length === 0) {
-              this.mostrarNotificacion('warning', 'No se encontraron registros instalados para ese cliente.');
+            const porSoftware = new Map<string, any[]>();
+
+            for (const item of normalizados) {
+              if (!porSoftware.has(item.nombre)) {
+                porSoftware.set(item.nombre, []);
+              }
+              porSoftware.get(item.nombre)!.push(item);
             }
 
-            // ✅ Generar gráficos solo cuando hay datos reales
+            const resultadoFinal: any[] = [];
+
+            porSoftware.forEach((items) => {
+              const siItems = items.filter(i => i.instalado === 'SI');
+
+              if (siItems.length > 0) {
+                resultadoFinal.push(...siItems);
+              } else {
+                const noItemsConFecha = items
+                  .filter(i => i.instalado === 'NO' && i.fecha)
+                  .sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
+
+                if (noItemsConFecha.length > 0) {
+                  resultadoFinal.push(noItemsConFecha[0]);
+                } else {
+                  resultadoFinal.push(items[0]);
+                }
+              }
+            });
+
+            this.datosFiltrados = resultadoFinal.sort((a, b) =>
+              a.nombre.localeCompare(b.nombre, 'es', { numeric: true, sensitivity: 'base' })
+            );
+
+            this.datosFiltradosOriginal = [...this.datosFiltrados]; // guardamos copia para restaurar luego
+
+            if (this.datosFiltrados.length > 0) {
+              this.seleccionarFilaTabla(this.datosFiltrados[0]);
+            } else {
+              this.mostrarNotificacion('warning', 'No se encontraron registros para ese cliente.');
+            }
+
             this.generarGraficoFabricantes();
             this.generarGraficoInstalaciones();
           },
@@ -118,27 +222,46 @@ export class ClienteSoftware {
   mostrarHistorialSoftware(filaSeleccionada: any) {
     const nombreSoftware = filaSeleccionada.nombre;
     const cliente = filaSeleccionada.cliente;
-  
+
     this.archivoService.obtenerDatosSoftware(this.idArchivo, cliente).subscribe({
       next: (res) => {
         const historial = res.filter(item => item.nombre === nombreSoftware);
-  
-        this.historialVersiones = historial.sort((a, b) => {
-          const fechaA = new Date(a.fecha).getTime();
-          const fechaB = new Date(b.fecha).getTime();
-          return fechaB - fechaA;
-        });
-  
-        this.ultimaFechaVersion = this.historialVersiones[0]?.fecha || '';
+
+        const historialLimpio = historial.map(item => ({
+          ...item,
+          fecha: item.fecha?.toLowerCase() === 'desconocido' || !item.fecha ? null : item.fecha,
+          version: item.version || '0.0.0'
+        }));
+
+        const conFecha = historialLimpio.filter(h => h.fecha);
+        if (conFecha.length > 0) {
+          this.historialVersiones = historialLimpio.sort((a, b) =>
+            new Date(b.fecha || '').getTime() - new Date(a.fecha || '').getTime()
+          );
+          this.ultimaFechaVersion = conFecha[0]?.fecha || '';
+        } else {
+          const parseVersion = (v: string) => v.split('.').map(num => parseInt(num) || 0);
+          this.historialVersiones = historialLimpio.sort((a, b) => {
+            const va = parseVersion(a.version);
+            const vb = parseVersion(b.version);
+            for (let i = 0; i < Math.max(va.length, vb.length); i++) {
+              const diff = (vb[i] || 0) - (va[i] || 0);
+              if (diff !== 0) return diff;
+            }
+            return 0;
+          });
+          this.ultimaFechaVersion = '';
+          this.ultimaVersionNombre = this.historialVersiones[0]?.version || '';
+        }
       },
       error: (err) => {
         console.error('Error al obtener historial del software:', err);
         this.historialVersiones = [];
         this.ultimaFechaVersion = '';
+        this.ultimaVersionNombre = '';
       }
     });
   }
-  
 
   obtenerValorSeguro(valor: any): string {
     return valor && valor.toString().trim() !== '' ? valor : 'Desconocido';
@@ -154,10 +277,6 @@ export class ClienteSoftware {
     this.mostrarAlerta = false;
   }
 
-  get hayArchivoCargado(): boolean {
-    return !!sessionStorage.getItem('archivo_software_seleccionado');
-  }
-
   obtenerArchivosSoftware() {
     this.archivoService.listarPorTipo('software').subscribe({
       next: (res) => {
@@ -165,6 +284,19 @@ export class ClienteSoftware {
       },
       error: (err) => {
         this.mostrarNotificacion('error', 'No se pudieron cargar los archivos.');
+      }
+    });
+  }
+
+  obtenerTodosLosClientes() {
+    this.archivoService.obtenerClientesUnicosSoftware(this.idArchivo).subscribe({
+      next: (clientes) => {
+        this.todosLosClientes = clientes.sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
+        this.clientesFiltrados = [...this.todosLosClientes];
+      },
+      error: () => {
+        this.todosLosClientes = [];
+        this.clientesFiltrados = [];
       }
     });
   }
@@ -178,7 +310,7 @@ export class ClienteSoftware {
 
     const canvas = document.getElementById('graficoBarras') as HTMLCanvasElement;
     if (canvas && canvas.parentNode) {
-      canvas.parentNode.replaceChild(canvas.cloneNode(true), canvas); // Limpiar gráfico anterior
+      canvas.parentNode.replaceChild(canvas.cloneNode(true), canvas);
     }
 
     new Chart('graficoBarras', {
@@ -193,9 +325,7 @@ export class ClienteSoftware {
       },
       options: {
         responsive: true,
-        plugins: {
-          legend: { display: false }
-        },
+        plugins: { legend: { display: false } },
         scales: {
           x: { ticks: { autoSkip: false } },
           y: { beginAtZero: true }
@@ -204,9 +334,13 @@ export class ClienteSoftware {
     });
   }
 
-  historialVersiones: any[] = [];
-ultimaFechaVersion: string = '';
+  inputActivo: boolean = false;
 
+  ocultarListaConRetraso() {
+    setTimeout(() => {
+      this.inputActivo = false;
+    }, 200); // Espera breve para permitir selección con click
+  }
 
   generarGraficoInstalaciones() {
     const fechas = this.datosFiltrados
@@ -220,7 +354,7 @@ ultimaFechaVersion: string = '';
 
     const canvas = document.getElementById('graficoLineas') as HTMLCanvasElement;
     if (canvas && canvas.parentNode) {
-      canvas.parentNode.replaceChild(canvas.cloneNode(true), canvas); // Limpiar gráfico anterior
+      canvas.parentNode.replaceChild(canvas.cloneNode(true), canvas);
     }
 
     new Chart('graficoLineas', {
@@ -237,9 +371,7 @@ ultimaFechaVersion: string = '';
       },
       options: {
         responsive: true,
-        plugins: {
-          legend: { display: false }
-        },
+        plugins: { legend: { display: false } },
         scales: {
           x: { title: { display: true, text: 'Fecha' } },
           y: { title: { display: true, text: 'Cantidad' }, beginAtZero: true }

@@ -3,5 +3,6 @@ export interface ClienteSoftwareDTO {
     instalado: string;
     nombre: string;
     fecha: string;
+    version: string;
 
 }
