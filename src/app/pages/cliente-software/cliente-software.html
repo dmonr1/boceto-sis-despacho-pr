@@ -17,9 +17,7 @@
           </div>
           <button class="btn-buscar" (click)="buscarCliente()">Buscar</button>
         </div>
-
         <span class="contador-clientes">N° Registros: {{ datosFiltrados.length }}</span>
-
         <div class="zona-secundaria">
           <div class="dropdown-container" (clickOutside)="mostrarDropdown = false">
             <button class="btn-cambiar-archivo" (click)="toggleDropdown()">
@@ -38,20 +36,14 @@
               </div>
             </div>
           </div>
-
           <input type="text" [(ngModel)]="filtroSoftware" (input)="filtrarPorSoftware()" placeholder="Buscar software"
             class="input-filtrar-software" />
-
           <button class="btn-limpiar">
             <nz-icon nzType="delete" style="margin-right: 6px;"></nz-icon>
             Limpiar
           </button>
-
         </div>
       </div>
-
-
-
       <div class="card">
         <table class="tabla-software">
           <thead>
@@ -81,64 +73,54 @@
                 {{ obtenerValorSeguro(fila.fecha) }}
               </td>
             </tr>
-
-
           </tbody>
         </table>
       </div>
     </div>
     <div class="lado-derecho">
-
       <div class="contenedor-detalles">
         <div class="card-detalle">
-
           <ng-container *ngIf="filaSeleccionada; else sinClienteSeleccionado">
-            <h3 class="titulo-card">Historial de versiones software seleccionado</h3>
-
+            <h3 class="titulo-card">Historial de versiones software</h3>
             <p>N" de versiones instaladas: {{historialVersiones.length}}</p>
-
             <div class="lista-versiones">
-              <div class="fila-cabecera">
-                <span>Software</span>
-                <span>Versión</span>
-                <span>¿Instalado?</span>
-                <span>Fecha instalación</span>
+              <div *ngIf="cargandoHistorial" class="cargando-spinner">
+                <nz-icon nzType="loading" nzTheme="outline" class="icono-cargando"></nz-icon>
+                <span class="texto-cargando">Cargando historial...</span>
               </div>
-              <div *ngFor="let version of historialVersiones" class="fila-version" [class.ultima-version]="
-                  version.fecha === ultimaFechaVersion || 
-                  (!ultimaFechaVersion && version.version === ultimaVersionNombre)">
-                <span>{{ version.nombre }}</span>
-                <span>{{ version.version || 'Desconocido' }}</span>
-                <span>{{ version.instalado}}</span>
-                <span>{{ version.fecha || 'Desconocido' }}</span>
-              </div>
+              <ng-container *ngIf="!cargandoHistorial">
+                <div class="fila-cabecera">
+                  <span>Software</span>
+                  <span>Versión</span>
+                  <span>¿Instalado?</span>
+                  <span>Fecha instalación</span>
+                </div>
+                <div *ngFor="let version of historialVersiones" class="fila-version"
+                  [class.ultima-version]="version.fecha === ultimaFechaVersion">
+                  <span>{{ version.nombre }}</span>
+                  <span>{{ version.version || 'Desconocido' }}</span>
+                  <span>{{ version.instalado }}</span>
+                  <span>{{ version.fecha || 'Desconocido' }}</span>
+                </div>
+              </ng-container>
             </div>
           </ng-container>
-
           <ng-template #sinClienteSeleccionado>
             <div class="estado-vacio">
               <img src="assets/icons/risk-icon.png" alt="Advertencia" class="icono-vacio" />
               <p class="mensaje-vacio">Debe seleccionar un cliente</p>
             </div>
           </ng-template>
-
         </div>
       </div>
-
-
-
       <div class="contenedor-graficos">
         <div class="card-grafico">
           <h4 class="titulo-grafico">Historial de instalaciones</h4>
           <canvas id="graficoLineas"></canvas>
         </div>
-
-
       </div>
-
     </div>
   </div>
-
   <div class="contenedor-inferior">
     <div class="card-inferior">
       <h4>Cantidad de softwares por Fabricante</h4>
