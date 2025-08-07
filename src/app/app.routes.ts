@@ -17,5 +17,4 @@ export const routes: Routes = [
   { path: 'cliente-hardware', component: ClienteHardware, canActivate: [AuthGuard] },
   { path: 'cliente-software', component: ClienteSoftware, canActivate: [AuthGuard] },
   { path: 'dashboard/:tipo/:id', component: DashboardRouter, canActivate: [AuthGuard] }
-
 ];

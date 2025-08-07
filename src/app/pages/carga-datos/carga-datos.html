@@ -4,10 +4,8 @@
       <img src="assets/icons/icon-excel.png" alt="Excel" class="icono-excel" />
       Importar archivo Excel
     </button>
-
     <input type="file" #inputArchivo (change)="onFileChange($event)" accept=".xlsx, .xls" hidden />
   </div>
-
   <div class="tabla-archivos">
     <div class="cabecera-tabla">
       <h3 class="tabla-titulo">Archivos guardados en base de datos</h3>
@@ -15,7 +13,6 @@
         N° de registros: <span class="numero-pill">{{ archivosPaginados.length }}</span>
       </div>
     </div>
-
     <div class="tabla-scroll">
       <table>
         <thead>
@@ -34,7 +31,7 @@
           <tr *ngFor="let archivo of archivosPaginados" [class.fila-nueva]="archivo.id === idUltimoAgregado">
             <td>{{ archivo.id }}</td>
             <td>{{ archivo.nombreArchivo }}</td>
-            <td>{{ archivo.fechaSubida | date: 'dd/MM/yyyy - hh:mm a' }}</td> 
+            <td>{{ archivo.fechaSubida | date: 'dd/MM/yyyy - hh:mm a' }}</td>
             <td>{{ archivo.tipoArchivo }}</td>
             <td>
               <div class="acciones-botones">
@@ -49,13 +46,10 @@
                 </button>
               </div>
             </td>
-
           </tr>
         </tbody>
-
       </table>
     </div>
-
     <div class="paginacion" *ngIf="totalPaginas > 1">
       <button (click)="cambiarPagina(paginaActual - 1)" [disabled]="paginaActual === 1">Anterior</button>
       <span>Página {{ paginaActual }} de {{ totalPaginas }}</span>
@@ -64,19 +58,11 @@
   </div>
 </div>
 
-<app-alerta-personalizada
-  [visible]="mostrarAlerta"
-  [tipo]="tipoAlerta"
-  [mensaje]="mensajeAlerta"
-  (aceptar)="cerrarNotificacion()"
-  (cancelar)="cerrarNotificacion()">
+<app-alerta-personalizada [visible]="mostrarAlerta" [tipo]="tipoAlerta" [mensaje]="mensajeAlerta"
+  (aceptar)="cerrarNotificacion()" (cancelar)="cerrarNotificacion()">
 </app-alerta-personalizada>
 
-
-<app-alerta-personalizada
-  [visible]="mostrarPregunta"
-  [tipo]="'question'"
-  [mensaje]="'¿Estás seguro de eliminar este archivo?'"
-  (aceptar)="confirmarEliminacion()"
+<app-alerta-personalizada [visible]="mostrarPregunta" [tipo]="'question'"
+  [mensaje]="'¿Estás seguro de eliminar este archivo?'" (aceptar)="confirmarEliminacion()"
   (cancelar)="cancelarEliminacion()">
 </app-alerta-personalizada>

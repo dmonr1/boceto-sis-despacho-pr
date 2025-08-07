@@ -1,6 +1,9 @@
 .alerta-container {
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background-color: rgba(0, 0, 0, 0.45);
   display: flex;
   justify-content: center;
@@ -17,7 +20,7 @@
   position: relative;
   text-align: center;
   animation: fadeIn 0.3s ease-in-out;
-    margin-left: 8%; 
+  margin-left: 8%;
 
   &.pregunta {
     padding-top: 40px;
@@ -88,13 +91,27 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.9); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 @keyframes fadeOut {
-  from { opacity: 1; transform: scale(1); }
-  to { opacity: 0; transform: scale(0.9); }
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(0.9);
+  }
 }
 
 .fade-out {

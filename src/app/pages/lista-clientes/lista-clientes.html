@@ -1,7 +1,6 @@
 <div class="contenedor-general">
     <div class="lado-izquierdo">
         <h2 class="subtitulo">Buscar Clientes:</h2>
-
         <div class="contenedor-busqueda-dropdown">
             <div class="busqueda">
                 <input type="text" class="input-busqueda" placeholder="Ingrese cliente" [(ngModel)]="textoBusqueda"
@@ -9,14 +8,12 @@
                 <button class="btn-buscar" (click)="filtrarClientes()">Buscar</button>
                 <span class="contador-clientes">N° Clientes: {{ datosFiltrados.length }}</span>
             </div>
-
             <div class="info-clientes" (clickOutside)="mostrarDropdown = false">
                 <div class="dropdown-container">
                     <button class="btn-cambiar-archivo" (click)="toggleDropdown()">
                         {{ hayArchivoCargado ? 'Cambiar archivo' : 'Elegir archivo de cliente' }}
                         <nz-icon nzType="down" style="margin-left: 6px;"></nz-icon>
                     </button>
-
                     <div *ngIf="mostrarDropdown" class="dropdown-archivos">
                         <div *ngIf="archivosResumen.length === 0" class="opcion-dropdown">
                             No hay archivos resumen
@@ -29,12 +26,10 @@
                                 [ngStyle]="{ color: '#gb(59 59 59)', float: 'right' }">
                             </nz-icon>
                         </div>
-
                     </div>
                 </div>
             </div>
         </div>
-
         <div class="card-clientes">
             <table class="tabla-clientes">
                 <thead>
@@ -70,22 +65,17 @@
                             [ngClass]="{'resaltado-desconocido-tabla': obtenerValorSeguro(fila.version) === 'Desconocido'}">
                             {{ obtenerValorSeguro(fila.estado) }}
                         </td>
-
-
-
                     </tr>
                 </tbody>
             </table>
         </div>
     </div>
-
     <div class="lado-derecho" id="zona-imprimir">
         <div class="card-superior">
             <ng-container *ngIf="datosFiltrados.length > 0; else sinCliente">
                 <div class="avatar-derecha-fondo" [class.aparecer]="animarContenido">
                     <nz-avatar [nzText]="letraAvatar" class="avatar-responsive"></nz-avatar>
                 </div>
-
                 <div class="grupo-izquierdo">
                     <div class="contenido-superior">
                         <p>Cliente: <span>{{ obtenerValorSeguro(clienteSeleccionado?.cliente) }}</span></p>
@@ -101,7 +91,6 @@
                     </div>
                 </div>
             </ng-container>
-
             <ng-template #sinCliente>
                 <div class="contenedor-sin-datos">
                     <img src="assets/icons/risk-icon.png" alt="Advertencia" class="icono-warning" />
@@ -109,7 +98,6 @@
                 </div>
             </ng-template>
         </div>
-
         <div class="card-inferior">
             <ng-container *ngIf="datosFiltrados.length > 0; else sinDatos">
                 <h3 class="titulo-inferior navegable">
@@ -119,7 +107,6 @@
                     <button (click)="cambiarCliente(1)" [disabled]="indiceClienteActual === datosFiltrados.length - 1"
                         class="flecha">&#x25B6;</button>
                 </h3>
-
                 <div class="grupo-dato">
                     <span class="etiqueta">Motor de análisis principal:</span>
                     <span class="valor"
@@ -127,7 +114,6 @@
                         {{ obtenerValorSeguro(clienteSeleccionado?.motorA) }}
                     </span>
                 </div>
-
                 <div class="grupo-dato">
                     <span class="etiqueta">Motor de respaldo:</span>
                     <span class="valor"
@@ -135,7 +121,6 @@
                         {{ obtenerValorSeguro(clienteSeleccionado?.motorB) }}
                     </span>
                 </div>
-
                 <div class="grupo-dato">
                     <span class="etiqueta">Versión del antivirus instalado:</span>
                     <span class="valor"
@@ -143,7 +128,6 @@
                         {{ obtenerValorSeguro(clienteSeleccionado?.version) }}
                     </span>
                 </div>
-
                 <div class="grupo-dato">
                     <span class="etiqueta">Componentes de seguridad:</span>
                     <span class="valor"
@@ -151,7 +135,6 @@
                         {{ obtenerValorSeguro(clienteSeleccionado?.componentes) }}
                     </span>
                 </div>
-
                 <div class="grupo-dato">
                     <span class="etiqueta">¿Requiere reinicio del equipo?:</span>
                     <span class="valor"
@@ -159,7 +142,6 @@
                         {{ obtenerValorSeguro(clienteSeleccionado?.reiniciar) }}
                     </span>
                 </div>
-
                 <div class="grupo-dato">
                     <span class="etiqueta">Última actualización del antivirus:</span>
                     <span class="valor"
@@ -167,7 +149,6 @@
                         {{ obtenerValorSeguro(clienteSeleccionado?.ultimaSync) }}
                     </span>
                 </div>
-
                 <div class="grupo-dato">
                     <span class="etiqueta">Base de datos de virus actualizada el:</span>
                     <span class="valor"
@@ -175,7 +156,6 @@
                         {{ obtenerValorSeguro(clienteSeleccionado?.actualizarVirus) }}
                     </span>
                 </div>
-
                 <div class="grupo-dato">
                     <span class="etiqueta">Actualización del programa realizada el:</span>
                     <span class="valor"
@@ -183,7 +163,6 @@
                         {{ obtenerValorSeguro(clienteSeleccionado?.actualizarProgramas) }}
                     </span>
                 </div>
-
                 <div class="grupo-dato">
                     <span class="etiqueta">Tipo de equipo / perfil de instalación:</span>
                     <span class="valor"
@@ -191,7 +170,6 @@
                         {{ obtenerValorSeguro(clienteSeleccionado?.tipo) }}
                     </span>
                 </div>
-
                 <div class="contenedor-boton-pdf">
                     <button class="btn-pdf" (click)="imprimirPDF()">
                         <nz-icon nzType="file-pdf" class="icono-pdf"></nz-icon>
@@ -199,7 +177,6 @@
                     </button>
                 </div>
             </ng-container>
-
             <ng-template #sinDatos>
                 <div class="contenedor-sin-datos">
                     <img src="assets/icons/risk-icon.png" alt="Advertencia" class="icono-warning" />
@@ -207,7 +184,6 @@
                 </div>
             </ng-template>
         </div>
-
     </div>
 </div>
 

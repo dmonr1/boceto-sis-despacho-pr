@@ -14,7 +14,6 @@ export class AlertaPersonalizada implements OnInit, OnChanges {
   @Input() tipo: 'success' | 'error' | 'warning' | 'question' = 'success';
   @Input() mensaje: string = '';
   @Input() visible: boolean = false;
-
   @Output() aceptar = new EventEmitter<void>();
   @Output() cancelar = new EventEmitter<void>();
 
@@ -72,6 +71,6 @@ export class AlertaPersonalizada implements OnInit, OnChanges {
       this.visible = false;
       this.cerrarAnimando = false;
       callback();
-    }, 300); 
+    }, 300);
   }
 }

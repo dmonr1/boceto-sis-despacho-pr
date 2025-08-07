@@ -3,12 +3,10 @@
     [ngStyle]="{ borderColor: color }">
     <i nz-icon [nzType]="icono" [ngStyle]="{ color: color, fontSize: '32px' }" class="icono-alerta"></i>
     <span class="mensaje">{{ mensaje }}</span>
-
     <div class="acciones">
       <button class="btn btn-confirmar" (click)="onAceptar()">Aceptar</button>
       <button *ngIf="esPregunta" class="btn btn-cancelar" (click)="onCancelar()">Cancelar</button>
     </div>
-
     <span class="cerrar" (click)="cerrar()">&times;</span>
   </div>
 </div>

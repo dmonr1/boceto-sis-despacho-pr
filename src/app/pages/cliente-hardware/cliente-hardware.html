@@ -1,6 +1,5 @@
 <div class="contenedor-hardware">
   <div class="contenedor-superior">
-
     <div class="card card-1 card-superior">
       <ng-container *ngIf="!cargandoArchivo && clienteSeleccionadoHardware; else sinDatosCard1">
         <h4 class="titulo-card">Componentes internos</h4>
@@ -41,7 +40,6 @@
         </div>
       </ng-template>
     </div>
-
     <div class="card card-2 card-fabricante">
       <ng-container *ngIf="!cargandoArchivo && clienteSeleccionadoHardware; else sinDatosCard2">
         <h4 class="titulo-card">Información del BIOS</h4>
@@ -83,7 +81,6 @@
         </div>
       </ng-template>
     </div>
-
     <div class="card card-3 card-cpu">
       <ng-container *ngIf="!cargandoArchivo && clienteSeleccionadoHardware; else sinDatosCard3">
         <h4 class="titulo-card">Información del equipo</h4>
@@ -124,12 +121,11 @@
       </ng-template>
     </div>
   </div>
-
   <div class="contenedor-inferior">
     <div class="contenedor-tabla">
       <div class="barra-herramientas">
         <input type="text" [(ngModel)]="filtroCliente" (input)="filtrarAlEscribir()" (keydown.enter)="validarBusqueda()"
-          placeholder="Buscar cliente..." class="input-busqueda"   style="text-transform: uppercase;" />
+          placeholder="Buscar cliente..." class="input-busqueda" style="text-transform: uppercase;" />
 
         <button class="btn-buscar" (click)="validarBusqueda()">Buscar</button>
         <span class="contador-clientes">Mostrando {{ clientesFiltrados.length }} clientes</span>
@@ -154,7 +150,6 @@
           </div>
         </div>
       </div>
-
       <div class="card">
         <table class="tabla-hardware">
           <thead>
@@ -192,29 +187,23 @@
           </tbody>
         </table>
       </div>
-
     </div>
-
     <div class="contenedor-doble-card">
       <div class="card card-5 grafico-donut">
         <ng-container *ngIf="!cargandoArchivo && clienteSeleccionadoHardware; else sinDatosCard5">
           <h4 class="titulo-card">Especificaciones del sistema</h4>
-
           <nz-progress [nzType]="'circle'" [nzPercent]="porcentajeMemoriaDisponible"
             [nzStrokeColor]="obtenerColorMemoria()" [nzFormat]="formatPorcentaje">
           </nz-progress>
-
           <p class="detalle-memoria">
             {{ memoriaDisponibleGB.toFixed(2) }} GB de {{ memoriaTotalGB.toFixed(2) }} GB
           </p>
-
           <p>
             RAM instalada:
             <span [ngClass]="{'resaltado-desconocido': clienteSeleccionadoHardware.ram === 'Desconocido'}">
               {{ clienteSeleccionadoHardware.ram }}
             </span>
           </p>
-
           <p>
             Memoria del sistema disponible:
             <span
@@ -222,7 +211,6 @@
               {{ clienteSeleccionadoHardware.memoriaDisponible }}
             </span>
           </p>
-
           <p>
             Memoria total disponible:
             <span [ngClass]="{'resaltado-desconocido': clienteSeleccionadoHardware.memoriaTotalGB === 'Desconocido'}">
@@ -230,7 +218,6 @@
             </span>
           </p>
         </ng-container>
-
         <ng-template #sinDatosCard5>
           <div *ngIf="!cargandoArchivo" class="estado-vacio-card">
             <img src="assets/icons/risk-icon.png" alt="Sin datos" />
@@ -239,7 +226,6 @@
         </ng-template>
       </div>
     </div>
-
   </div>
 </div>
 

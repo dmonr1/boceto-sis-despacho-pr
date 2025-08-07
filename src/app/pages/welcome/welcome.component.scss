@@ -2,8 +2,6 @@
     display: flex;
     gap: 24px;
     padding: 15px;
-
-
     background-color: #ffffff !important;
     height: 100%;
     overflow: auto;
@@ -91,7 +89,6 @@
             box-shadow: 0 10px 24px rgba(0, 0, 0, 0.16);
         }
 
-        // Variantes de altura personalizadas
         &.card-altura-100 {
             height: 100px;
         }
@@ -112,6 +109,4 @@
             height: auto;
         }
     }
-
-   
 }
