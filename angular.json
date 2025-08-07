@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "boceto-sis-despacho-pr": {
+    "sitema-de-monitoreo-dp": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -74,10 +74,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "boceto-sis-despacho-pr:build:production"
+              "buildTarget": "sitema-de-monitoreo-dp:build:production"
             },
             "development": {
-              "buildTarget": "boceto-sis-despacho-pr:build:development"
+              "buildTarget": "sitema-de-monitoreo-dp:build:development"
             }
           },
           "defaultConfiguration": "development"
