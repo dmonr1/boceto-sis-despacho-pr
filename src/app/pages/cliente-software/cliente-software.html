@@ -38,7 +38,7 @@
           </div>
           <input type="text" [(ngModel)]="filtroSoftware" (input)="filtrarPorSoftware()" placeholder="Buscar software"
             class="input-filtrar-software" />
-          <button class="btn-limpiar">
+          <button class="btn-limpiar" (click)="limpiarInput()">
             <nz-icon nzType="delete" style="margin-right: 6px;"></nz-icon>
             Limpiar
           </button>

@@ -6,8 +6,6 @@ import { ActivatedRoute } from '@angular/router';
 import { Archivo } from '../../services/archivo';
 import { AlertaPersonalizada } from '../../components/alerta-personalizada/alerta-personalizada';
 import { Chart, registerables } from 'chart.js';
-
-
 Chart.register(...registerables);
 
 @Component({
@@ -17,30 +15,25 @@ Chart.register(...registerables);
   templateUrl: './cliente-software.html',
   styleUrl: './cliente-software.scss'
 })
+
 export class ClienteSoftware {
   textoBusqueda = '';
   filtroSoftware = '';
   inputActivo = false;
-
   datosFiltrados: any[] = [];
   datosFiltradosOriginal: any[] = [];
-
   archivosSoftware: any[] = [];
   idArchivo = 0;
   mostrarDropdown = false;
-
   mostrarAlerta = false;
   tipoAlerta: 'success' | 'error' | 'warning' = 'success';
   mensajeAlerta = '';
-
   todosLosClientes: string[] = [];
   clientesFiltrados: string[] = [];
-
   filaSeleccionada: any = null;
   historialVersiones: any[] = [];
   ultimaFechaVersion: string = '';
   ultimaVersionNombre: string = '';
-
   cargandoHistorial: boolean = false;
   cargandoGraficos: boolean = false;
 
@@ -230,7 +223,6 @@ export class ClienteSoftware {
     });
   }
 
-
   obtenerValorSeguro(valor: any): string {
     return valor && valor.toString().trim() !== '' ? valor : 'Desconocido';
   }
@@ -272,8 +264,6 @@ export class ClienteSoftware {
       : [...this.datosFiltradosOriginal];
   }
 
-
-
   generarGraficoFabricantes() {
     this.cargandoGraficos = true;
 
@@ -308,7 +298,7 @@ export class ClienteSoftware {
       }
     });
 
-    setTimeout(() => this.cargandoGraficos = false, 300); 
+    setTimeout(() => this.cargandoGraficos = false, 300);
   }
 
   generarGraficoInstalaciones() {
@@ -348,9 +338,11 @@ export class ClienteSoftware {
         }
       }
     });
-
-    setTimeout(() => this.cargandoGraficos = false, 300); 
-
+    setTimeout(() => this.cargandoGraficos = false, 300);
   }
 
+  limpiarInput() {
+    this.filtroSoftware = '';
+    this.filtrarPorSoftware(); 
+  }
 }
